@@ -1,10 +1,10 @@
 {
   "name": "jstools-abhilashkasula",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "directories": {
-    "doc": "docs"
+    "doc": "docs",
+    "test": "test"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/step-batch-7/jsTools-abhilashkasula/issues"
   },
-  "homepage": "https://github.com/step-batch-7/jsTools-abhilashkasula#readme"
+  "homepage": "https://github.com/step-batch-7/jsTools-abhilashkasula#readme",
+  "description": "",
+  "devDependencies": {
+    "chai": "^4.2.0"
+  }
 }
