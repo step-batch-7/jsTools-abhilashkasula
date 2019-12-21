@@ -1,0 +1,24 @@
+Features:
+1) node cut.js -d : -f 2 fileToCut.txt
+2) cat fileToCut.txt | node cut.js -d : -f 2
+3) node cut.js -d : -f 2,3,4 fileToCut.txt
+4) cat fileToCut.txt | node cut.js -d : -f 2,3,4
+5) node cut.js -f 2 fileToCut.txt
+6) cat fileToCut.txt | node cut.js -f 2
+7) node cut.js -f 2,3,4 fileToCut.txt
+8) cat fileToCut.txt | node cut.js -f 2,3,4
+9) node cut.js -d : -f 2 file1.txt file2.txt
+----------------------------
+v0.1  
+node cut.js -d : -f 2 fileToCut.txt
+  create files & folders: src test package cut.js cutLib.js cutLibTest.js appTest
+  modules: chai
+  check connections: mocha, cut.js-cutLib, nyc, appTest
+
+  Black Boxes:
+  last step: joinLines => (cut lines) or generateErrorMessage => (errorMessage)
+  extractFieldsOfEachLine => (extractedFieldsOfLines or errorObject)
+  parseContent => (lines)
+  loadFileContent => (fileContent) or loadStdinContent (stdinContent)
+  readFileNames => (filenames) and readCutOptions => (cutOptions)
+  filterUserOptions => (options)

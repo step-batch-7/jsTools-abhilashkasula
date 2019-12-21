@@ -107,7 +107,7 @@ jsTools
   [1.4a]
   output => string: fileContent or errorObject
       'line1\nline2\nlineN' or 'cut: file: No such file or directory'
-  input => string: filename
+  input => string: filenames
       'fileToCut1.txt,fileToCut2.txt'
   name => loadFileContent
 
@@ -118,7 +118,7 @@ jsTools
   name => loadStdinContent
 
   [1.5a]
-  output => string: filename
+  output => string: filenames
       'fileToCut1.txt,fileToCut2.txt'
   input => arrayOfStrings: options
       ['-d',':','-f','2','fileToCut1.txt','fileToCut2.txt']
