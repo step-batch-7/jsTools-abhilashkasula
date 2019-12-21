@@ -1,0 +1,49 @@
+Features:
+node cut.js -d : -f 2 fileToCut.txt
+node cut.js -d : -f 2,3,4 fileToCut.txt
+cat fileToCut.txt | node cut.js -d : -f 2,3,4
+node cut.js -f 2 fileToCut.txt
+node cut.js -f 2,3,4 fileToCut.txt
+cat fileToCut.txt | node cut.js -f 2
+cat fileToCut.txt | node cut.js -f 2,3,4
+node cut.js -d : -f 2 file1.txt file2.txt
+
+
+cat fileToCut.txt | node cut.js -f 2-4
+node cut.js -f 2-4 fileToCut.txt
+node cut.js -d : -f 2-4 fileToCut.txt
+cat fileToCut.txt | node cut.js -d : -f 2-4
+node cut.js -b 2 fileToCut.txt
+node cut.js -b 2,3,4 fileToCut.txt
+cat fileToCut.txt | node cut.js -b 2
+cat fileToCut.txt | node cut.js -b 2,3,4
+node cut.js -c 2,3,4 fileToCut.txt
+node cut.js -c 2 fileToCut.txt
+cat fileToCut.txt | node cut.js -c 2
+cat fileToCut.txt | node cut.js -c 2,3,4
+node cut.js -d : -f -2 fileToCut.txt
+node cut.js -d : -f 2- fileToCut.txt
+node cut.js -f 2- fileToCut.txt
+node cut.js -f -2 fileToCut.txt
+cat fileToCut.txt | node cut.js -f 2-
+cat fileToCut.txt | node cut.js -f -2
+cat fileToCut.txt | node cut.js -d : -f 2-
+cat fileToCut.txt | node cut.js -d : -f -2
+node cut.js -d : -s -f 2 fileToCut.txt
+node cut.js -d : -s -f 2,3,4 fileToCut.txt
+node cut.js -d : -s -f 2-4 fileToCut.txt
+node cut.js -d : -s -f 2- fileToCut.txt
+node cut.js -d : -s -f -2 fileToCut.txt
+cat fileToCut.txt | node cut.js -d : -s -f 2,3,4
+cat fileToCut.txt | node cut.js -d : -s -f 2-4
+cat fileToCut.txt | node cut.js -d : -s -f 2-
+cat fileToCut.txt | node cut.js -d : -s -f -2
+
+
+content of fileToCut.txt
+hello:hi
+hi:hello
+step:7
+step 7
+step\t7
+
