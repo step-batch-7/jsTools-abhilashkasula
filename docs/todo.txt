@@ -19,7 +19,7 @@ node cut.js -d : -f 2 fileToCut.txt
 
   tasks
     last step: joinLines
-    generateErrorMessage
+    displayErrorMessage
     extractFieldsOfEachLine
     parseContent
     loadFileContent 
