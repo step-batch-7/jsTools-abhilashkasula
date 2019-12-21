@@ -1,12 +1,13 @@
 Features:
-node cut.js -d : -f 2 fileToCut.txt
-node cut.js -d : -f 2,3,4 fileToCut.txt
-cat fileToCut.txt | node cut.js -d : -f 2,3,4
-node cut.js -f 2 fileToCut.txt
-node cut.js -f 2,3,4 fileToCut.txt
-cat fileToCut.txt | node cut.js -f 2
-cat fileToCut.txt | node cut.js -f 2,3,4
-node cut.js -d : -f 2 file1.txt file2.txt
+1) node cut.js -d : -f 2 fileToCut.txt
+2) cat fileToCut.txt | node cut.js -d : -f 2
+3) node cut.js -d : -f 2,3,4 fileToCut.txt
+4) cat fileToCut.txt | node cut.js -d : -f 2,3,4
+5) node cut.js -f 2 fileToCut.txt
+6) cat fileToCut.txt | node cut.js -f 2
+7) node cut.js -f 2,3,4 fileToCut.txt
+8) cat fileToCut.txt | node cut.js -f 2,3,4
+9) node cut.js -d : -f 2 file1.txt file2.txt
 
 
 cat fileToCut.txt | node cut.js -f 2-4
@@ -47,3 +48,78 @@ step:7
 step 7
 step\t7
 
+--- individual flows ---
+== (1) flow for 'cut -d : -f 2 fileToCut.txt' ==
+a. zero as range
+b. no file
+c. should take 1st range if multiple is given
+d. option value is not present
+
+Requirement:
+node cut.js -d : -f 2 fileToCut.txt
+hi
+hello
+7
+step 7
+step\t7
+
+  [1.1a] The last step
+  output => text: cutLines
+      hi
+      hello
+      7
+      step 7
+      step\t7
+  input => arrayOfStrings: extractedFieldsOfLines
+      [extractedFromLine1,extractedFromLine2,extractedFromLine3,extractedFromLinen]
+  name => joinLines
+
+  [1.1b] 
+  output => text: errorMessage
+      'cut: [-cf] list: illegal list value'
+  input => errorObject
+  name => generateErrorMessage
+
+  [1.2]
+  output => arrayOfStrings: extractedFieldsOfLines or errorObject
+      [extractedFromLine1,extractedFromLine2,extractedFromLine3,extractedFromLinen]
+  input => arrayOfString: lines, arrayOfStrings: cutOptions
+      [line1,line2,line3,linen], ['-d',':','-f','2']
+  name => extractFieldsOfEachLine
+  [Note: It will extract fields if the given field range is positive number and non zero]
+  [Note: It takes the field range of min(fieldsInFile,fieldGiven)]
+
+  [1.3] 
+  output => arrayOfStrings: lines
+      [line1,line2,line3,linen], ['-d',':','-f','2']
+  input => string: fileContent
+      'line1\nline2\nlineN'
+  name => parseContent
+
+  [1.4]
+  output => string: fileContent
+      'line1\nline2\nlineN'
+  input => string: filename
+      'fileToCut.txt'
+  name: loadFileContent
+
+  [1.5a]
+  output => string: filename
+      'fileToCut.txt'
+  input => arrayOfStrings: options
+      ['-d',':','-f','2','fileToCut.txt']
+  name => readFileName
+
+  [1.5b]
+  output => arrayOfStrings: cutOptions
+      ['-d',':','-f','2']
+  input => arrayOfStrings: options
+      ['-d',':','-f','2','fileToCut.txt']
+  name => readCutOptions
+
+  [1.6]
+  output => arrayOfStrings: options
+      ['-d',':','-f','2','fileToCut.txt']
+  input => arrayOfStrings: cmdLineArgs
+      ['node','cut.js','-d',':','-f','2','fileToCut.txt']
+  name => filterUserOptions
