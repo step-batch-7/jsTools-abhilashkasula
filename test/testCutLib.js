@@ -2,7 +2,8 @@ const { assert } = require("chai");
 const {
   joinLines,
   extractFieldsOfEveryLine,
-  parseContent
+  parseContent,
+  readFileName
 } = require("../src/cutLib.js");
 
 describe("joinLines", function() {
@@ -69,5 +70,12 @@ describe("parseContent", function() {
       "right",
       "now"
     ]);
+  });
+});
+
+describe("readFileName", function() {
+  it("should give filename for the given options", function() {
+    const options = ["-d", ":", "-f", "2", "fileToCut1.txt"];
+    assert.strictEqual(readFileName(options), "fileToCut1.txt");
   });
 });

@@ -23,4 +23,14 @@ const parseContent = content => {
   return content.split(`\n`);
 };
 
-module.exports = { joinLines, extractFieldsOfEveryLine, parseContent };
+const readFileName = options => {
+  const [, , , , filename] = options;
+  return filename;
+};
+
+module.exports = {
+  joinLines,
+  extractFieldsOfEveryLine,
+  parseContent,
+  readFileName
+};
