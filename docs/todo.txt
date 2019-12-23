@@ -19,11 +19,11 @@ node cut.js -d : -f 2 fileToCut.txt
 
   tasks
     --done-- last step: joinLines
-    displayErrorMessage
+    --done-- displayErrorMessage
     --done-- extractFieldsOfEachLine
     --done-- parseContent
-    loadFileContent 
-    loadStdinContent
+    --done-- loadFileContent 
     --done-- readFileNames 
     --done-- readCutOptions
-    filterUserOptions
+    --done-- filterUserOptions
+    need to make all the functions asynchronous
