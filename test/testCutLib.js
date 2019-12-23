@@ -20,28 +20,38 @@ describe("extractFieldsOfEveryLine", function() {
       ["cut:this"],
       ["-d", ":", "-f", "2"]
     );
-    assert.deepStrictEqual(actual, ["this"]);
+    assert.deepStrictEqual(actual, { extractedLines: ["this"] });
   });
   it("should give empty line for field not found in line", function() {
     const actual = extractFieldsOfEveryLine(
       ["cut:this"],
       ["-d", ":", "-f", "4"]
     );
-    assert.deepStrictEqual(actual, [""]);
+    assert.deepStrictEqual(actual, { extractedLines: [""] });
   });
   it("should give whole line for delimiter not found", function() {
     const actual = extractFieldsOfEveryLine(
       ["cut:this"],
       ["-d", ",", "-f", "4"]
     );
-    assert.deepStrictEqual(actual, ["cut:this"]);
+    assert.deepStrictEqual(actual, { extractedLines: ["cut:this"] });
   });
   it("should extract one field from each line for more than one line", function() {
     const actual = extractFieldsOfEveryLine(
       ["cut:this", "this:cut", "hello:hi"],
       ["-d", ":", "-f", "2"]
     );
-    assert.deepStrictEqual(actual, ["this", "cut", "hi"]);
+    assert.deepStrictEqual(actual, { extractedLines: ["this", "cut", "hi"] });
+  });
+  it(`should give error in the object if the field is 0`, () => {
+    const actual = extractFieldsOfEveryLine(["cut"], ["-d", ":", "-f", "0"]);
+    const expected = { error: "cut: [-cf] list: illegal list value" };
+    assert.deepStrictEqual(actual, expected);
+  });
+  it(`should give error in the object if the field is not a number`, () => {
+    const actual = extractFieldsOfEveryLine(["cut"], ["-d", ":", "-f", "a"]);
+    const expected = { error: "cut: [-cf] list: illegal list value" };
+    assert.deepStrictEqual(actual, expected);
   });
 });
 

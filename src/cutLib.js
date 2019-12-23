@@ -4,13 +4,19 @@ const extractFieldForLine = function(line) {
   if (!line.includes(this.delimiter)) return line;
   const splitLine = line.split(this.delimiter);
   let extractedField = "";
-  splitLine[this.field - 1] && (extractedField = splitLine[this.field - 1]);
+  splitLine[this.newField - 1] &&
+    (extractedField = splitLine[this.newField - 1]);
   return extractedField;
 };
 
 const extractFieldsOfEveryLine = (lines, cutOptions) => {
   const [, delimiter, , field] = cutOptions;
-  return lines.map(extractFieldForLine.bind({ delimiter, field }));
+  const newField = +field;
+  if (newField == 0 || !Number.isInteger(newField))
+    return { error: "cut: [-cf] list: illegal list value" };
+  return {
+    extractedLines: lines.map(extractFieldForLine.bind({ delimiter, newField }))
+  };
 };
 
 const parseContent = content => {
