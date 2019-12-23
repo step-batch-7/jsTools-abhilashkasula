@@ -4,10 +4,7 @@ const { stdout, stderr, argv } = require("process");
 
 const main = () => {
   const { cutLines, error } = performCut(
-    {
-      readFileSync,
-      existsSync
-    },
+    { readFileSync, existsSync },
     argv.slice(2)
   );
   cutLines && stdout.write(cutLines);

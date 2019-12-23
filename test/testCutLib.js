@@ -9,15 +9,6 @@ const {
   readFileContent
 } = require("../src/cutLib.js");
 
-describe("joinLines", function() {
-  it("should give only one line without new lines for only one element in given array", function() {
-    assert.strictEqual(joinLines(["cut"]), "cut");
-  });
-  it("should join the given lines with newLine", function() {
-    assert.strictEqual(joinLines(["cut", "hello", "hi"]), "cut\nhello\nhi");
-  });
-});
-
 describe("extractFieldsOfEveryLine", function() {
   it("should extract one field for only one line", function() {
     const actual = extractFieldsOfEveryLine(
@@ -88,22 +79,6 @@ describe("readCutOptions", function() {
     const options = ["-d", ":", "-f", "2", "fileToCut1.txt"];
     const expected = ["-d", ":", "-f", "2"];
     assert.deepStrictEqual(readCutOptions(options), expected);
-  });
-});
-
-describe("filterUserOptions", function() {
-  it("should filter user options", function() {
-    const cmdLineArgs = [
-      "node",
-      "cut.js",
-      "-d",
-      ":",
-      "-f",
-      "2",
-      "fileToCut1.txt"
-    ];
-    const expected = ["-d", ":", "-f", "2", "fileToCut1.txt"];
-    assert.deepStrictEqual(filterUserOptions(cmdLineArgs), expected);
   });
 });
 

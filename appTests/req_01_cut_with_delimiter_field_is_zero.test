@@ -1,0 +1,2 @@
+node cut.js -d : -f 0 docs/fileToCut.txt
+cut: [-cf] list: values may not include zero

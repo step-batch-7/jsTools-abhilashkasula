@@ -3,12 +3,11 @@ const {
   readFileName,
   readFileContent,
   parseContent,
-  extractFieldsOfEveryLine,
-  joinLines
+  extractFieldsOfEveryLine
 } = require(`./cutLib`);
 
-const performCut = (helpers, options) => {
-  const { readFileSync, existsSync } = helpers;
+const performCut = (utils, options) => {
+  const { readFileSync, existsSync } = utils;
   const cutOptions = readCutOptions(options);
   const filename = readFileName(options);
   let { content, error } = readFileContent(readFileSync, existsSync, filename);
@@ -16,7 +15,7 @@ const performCut = (helpers, options) => {
   const parsedContent = parseContent(content);
   const fieldsOrError = extractFieldsOfEveryLine(parsedContent, cutOptions);
   if (fieldsOrError.error) return { error: fieldsOrError.error };
-  const cutLines = joinLines(fieldsOrError.extractedLines);
+  const cutLines = fieldsOrError.extractedLines.join("\n");
   return { cutLines };
 };
 

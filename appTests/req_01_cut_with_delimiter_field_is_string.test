@@ -1,0 +1,2 @@
+node cut.js -d : -f a docs/fileToCut.txt
+cut: [-cf] list: illegal list value
