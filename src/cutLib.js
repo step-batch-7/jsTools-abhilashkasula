@@ -14,9 +14,10 @@ const extractFieldsOfEveryLine = (lines, cutOptions) => {
   const newField = +field;
   if (newField == 0 || !Number.isInteger(newField))
     return { error: "cut: [-cf] list: illegal list value" };
-  return {
-    extractedLines: lines.map(extractFieldForLine.bind({ delimiter, newField }))
-  };
+  const extractedLines = lines.map(
+    extractFieldForLine.bind({ delimiter, newField })
+  );
+  return { extractedLines };
 };
 
 const parseContent = content => {
