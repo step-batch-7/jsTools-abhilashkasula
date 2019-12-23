@@ -12,7 +12,9 @@ const extractFieldForLine = function(line) {
 const extractFieldsOfEveryLine = (lines, cutOptions) => {
   const [, delimiter, , field] = cutOptions;
   const newField = +field;
-  if (newField == 0 || !Number.isInteger(newField))
+  if (newField == 0)
+    return { error: "cut: [-cf] list: values may not include zero" };
+  if (!Number.isInteger(newField))
     return { error: "cut: [-cf] list: illegal list value" };
   const extractedLines = lines.map(
     extractFieldForLine.bind({ delimiter, newField })

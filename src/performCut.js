@@ -1,5 +1,4 @@
 const {
-  filterUserOptions,
   readCutOptions,
   readFileName,
   readFileContent,
@@ -9,22 +8,16 @@ const {
 } = require(`./cutLib`);
 
 const performCut = (helpers, options) => {
-  const { readFileSync, existsSync, errStream, outStream } = helpers;
+  const { readFileSync, existsSync } = helpers;
   const cutOptions = readCutOptions(options);
   const filename = readFileName(options);
   let { content, error } = readFileContent(readFileSync, existsSync, filename);
-  if (error) {
-    errStream(error);
-    return;
-  }
+  if (error) return { error };
   const parsedContent = parseContent(content);
   const fieldsOrError = extractFieldsOfEveryLine(parsedContent, cutOptions);
-  if (fieldsOrError.error) {
-    errStream(fieldsOrError.error);
-    return;
-  }
+  if (fieldsOrError.error) return { error: fieldsOrError.error };
   const cutLines = joinLines(fieldsOrError.extractedLines);
-  outStream(cutLines);
+  return { cutLines };
 };
 
 module.exports = { performCut };

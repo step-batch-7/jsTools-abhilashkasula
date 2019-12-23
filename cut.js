@@ -3,17 +3,15 @@ const { readFileSync, existsSync } = require(`fs`);
 const { stdout, stderr, argv } = require("process");
 
 const main = () => {
-  const errStream = err => stderr.write(err);
-  const outStream = msg => stdout.write(msg);
-  performCut(
+  const { cutLines, error } = performCut(
     {
       readFileSync,
-      existsSync,
-      outStream,
-      errStream
+      existsSync
     },
     argv.slice(2)
   );
+  cutLines && stdout.write(cutLines);
+  error && stderr.write(error);
 };
 
 main();

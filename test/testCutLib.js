@@ -49,7 +49,7 @@ describe("extractFieldsOfEveryLine", function() {
   });
   it(`should give error in the object if the field is 0`, () => {
     const actual = extractFieldsOfEveryLine(["cut"], ["-d", ":", "-f", "0"]);
-    const expected = { error: "cut: [-cf] list: illegal list value" };
+    const expected = { error: "cut: [-cf] list: values may not include zero" };
     assert.deepStrictEqual(actual, expected);
   });
   it(`should give error in the object if the field is not a number`, () => {
