@@ -36,11 +36,17 @@ const filterUserOptions = cmdLineArgs => {
   return cmdLineArgs.slice(2);
 };
 
+const readFileContent = (readFile, isFileExists, filename) => {
+  if (isFileExists(filename)) return { content: readFile(filename, "utf8") };
+  return { error: `cut: ${filename}: No such file or directory` };
+};
+
 module.exports = {
   joinLines,
   extractFieldsOfEveryLine,
   parseContent,
   readFileName,
   readCutOptions,
-  filterUserOptions
+  filterUserOptions,
+  readFileContent
 };

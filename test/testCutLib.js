@@ -5,7 +5,8 @@ const {
   parseContent,
   readFileName,
   readCutOptions,
-  filterUserOptions
+  filterUserOptions,
+  readFileContent
 } = require("../src/cutLib.js");
 
 describe("joinLines", function() {
@@ -103,5 +104,29 @@ describe("filterUserOptions", function() {
     ];
     const expected = ["-d", ":", "-f", "2", "fileToCut1.txt"];
     assert.deepStrictEqual(filterUserOptions(cmdLineArgs), expected);
+  });
+});
+
+describe("readFileContent", function() {
+  it("should give the same data given", function() {
+    const read = data => {
+      assert.strictEqual(data, "cut\nthis");
+      return data;
+    };
+    const isExists = filename =>
+      assert.strictEqual(filename, "cut\nthis") || true;
+    assert.deepStrictEqual(readFileContent(read, isExists, "cut\nthis"), {
+      content: "cut\nthis"
+    });
+  });
+  it("should throw an error for the file not exists", function() {
+    const read = data => {
+      assert.strictEqual(data, "cut\nthis");
+      return data;
+    };
+    const isExists = filename => assert.strictEqual(filename, "file") || false;
+    assert.deepStrictEqual(readFileContent(read, isExists, "file"), {
+      error: `cut: file: No such file or directory`
+    });
   });
 });
