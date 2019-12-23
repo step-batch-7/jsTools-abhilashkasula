@@ -11,19 +11,19 @@ Features:
 ----------------------------
 v0.1  
 node cut.js -d : -f 2 fileToCut.txt
-  create files & folders: src test package cut.js cutLib.js cutLibTest.js appTest
-  modules: chai
-  npm init
-  check connections: mocha, cut.js-cutLib, nyc, appTest
-  initial commit
+  --done-- create files & folders: src test package cut.js cutLib.js cutLibTest.js appTest
+  --done-- modules: chai
+  --done-- npm init
+  --done-- check connections: mocha, cut.js-cutLib, nyc, appTest
+  --done-- initial commit
 
   tasks
-    last step: joinLines
+    --done-- last step: joinLines
     displayErrorMessage
-    extractFieldsOfEachLine
-    parseContent
+    --done-- extractFieldsOfEachLine
+    --done-- parseContent
     loadFileContent 
     loadStdinContent
-    readFileNames 
-    readCutOptions
+    --done-- readFileNames 
+    --done-- readCutOptions
     filterUserOptions

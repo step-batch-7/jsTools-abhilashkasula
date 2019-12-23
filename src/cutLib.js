@@ -28,9 +28,14 @@ const readFileName = options => {
   return filename;
 };
 
+const readCutOptions = options => {
+  return options.slice(0, -1);
+};
+
 module.exports = {
   joinLines,
   extractFieldsOfEveryLine,
   parseContent,
-  readFileName
+  readFileName,
+  readCutOptions
 };

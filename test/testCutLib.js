@@ -3,7 +3,8 @@ const {
   joinLines,
   extractFieldsOfEveryLine,
   parseContent,
-  readFileName
+  readFileName,
+  readCutOptions
 } = require("../src/cutLib.js");
 
 describe("joinLines", function() {
@@ -77,5 +78,13 @@ describe("readFileName", function() {
   it("should give filename for the given options", function() {
     const options = ["-d", ":", "-f", "2", "fileToCut1.txt"];
     assert.strictEqual(readFileName(options), "fileToCut1.txt");
+  });
+});
+
+describe("readCutOptions", function() {
+  it("should give the options for cut given", function() {
+    const options = ["-d", ":", "-f", "2", "fileToCut1.txt"];
+    const expected = ["-d", ":", "-f", "2"];
+    assert.deepStrictEqual(readCutOptions(options), expected);
   });
 });
