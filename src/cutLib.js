@@ -32,10 +32,15 @@ const readCutOptions = options => {
   return options.slice(0, -1);
 };
 
+const filterUserOptions = cmdLineArgs => {
+  return cmdLineArgs.slice(2);
+};
+
 module.exports = {
   joinLines,
   extractFieldsOfEveryLine,
   parseContent,
   readFileName,
-  readCutOptions
+  readCutOptions,
+  filterUserOptions
 };

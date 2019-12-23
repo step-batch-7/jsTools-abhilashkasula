@@ -4,7 +4,8 @@ const {
   extractFieldsOfEveryLine,
   parseContent,
   readFileName,
-  readCutOptions
+  readCutOptions,
+  filterUserOptions
 } = require("../src/cutLib.js");
 
 describe("joinLines", function() {
@@ -86,5 +87,21 @@ describe("readCutOptions", function() {
     const options = ["-d", ":", "-f", "2", "fileToCut1.txt"];
     const expected = ["-d", ":", "-f", "2"];
     assert.deepStrictEqual(readCutOptions(options), expected);
+  });
+});
+
+describe("filterUserOptions", function() {
+  it("should filter user options", function() {
+    const cmdLineArgs = [
+      "node",
+      "cut.js",
+      "-d",
+      ":",
+      "-f",
+      "2",
+      "fileToCut1.txt"
+    ];
+    const expected = ["-d", ":", "-f", "2", "fileToCut1.txt"];
+    assert.deepStrictEqual(filterUserOptions(cmdLineArgs), expected);
   });
 });
