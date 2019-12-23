@@ -46,7 +46,18 @@ describe("extractFieldsOfEveryLine", function() {
 });
 
 describe("parseContent", function() {
-  it("should only one line for no new line character in the given string", function() {
+  it("should give only one line for no new line character in the given string", function() {
     assert.deepStrictEqual(parseContent(`cut`), ["cut"]);
+  });
+  it(`should give two lines in an array for only one new line character in the given string`, () => {
+    assert.deepStrictEqual(parseContent(`cut\nthis`), ["cut", "this"]);
+  });
+  it(`should give lines in an array for more than one new line character in the given string`, () => {
+    assert.deepStrictEqual(parseContent(`cut\nthis\nright\nnow`), [
+      "cut",
+      "this",
+      "right",
+      "now"
+    ]);
   });
 });
