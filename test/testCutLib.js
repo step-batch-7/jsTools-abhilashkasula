@@ -1,50 +1,54 @@
 const { assert } = require("chai");
 const {
-  joinLines,
   extractFieldsOfEveryLine,
   parseContent,
-  readFileName,
-  readCutOptions,
-  filterUserOptions,
-  readFileContent
+  parseOptions,
+  readFileContent,
+  cut
 } = require("../src/cutLib.js");
 
 describe("extractFieldsOfEveryLine", function() {
   it("should extract one field for only one line", function() {
-    const actual = extractFieldsOfEveryLine(
-      ["cut:this"],
-      ["-d", ":", "-f", "2"]
-    );
+    const actual = extractFieldsOfEveryLine(["cut:this"], {
+      delimiter: ":",
+      field: "2"
+    });
     assert.deepStrictEqual(actual, { extractedLines: ["this"] });
   });
   it("should give empty line for field not found in line", function() {
-    const actual = extractFieldsOfEveryLine(
-      ["cut:this"],
-      ["-d", ":", "-f", "4"]
-    );
+    const actual = extractFieldsOfEveryLine(["cut:this"], {
+      delimiter: ":",
+      field: "4"
+    });
     assert.deepStrictEqual(actual, { extractedLines: [""] });
   });
   it("should give whole line for delimiter not found", function() {
-    const actual = extractFieldsOfEveryLine(
-      ["cut:this"],
-      ["-d", ",", "-f", "4"]
-    );
+    const actual = extractFieldsOfEveryLine(["cut:this"], {
+      delimiter: ",",
+      field: "4"
+    });
     assert.deepStrictEqual(actual, { extractedLines: ["cut:this"] });
   });
   it("should extract one field from each line for more than one line", function() {
     const actual = extractFieldsOfEveryLine(
       ["cut:this", "this:cut", "hello:hi"],
-      ["-d", ":", "-f", "2"]
+      { delimiter: ":", field: "2" }
     );
     assert.deepStrictEqual(actual, { extractedLines: ["this", "cut", "hi"] });
   });
   it(`should give error in the object if the field is 0`, () => {
-    const actual = extractFieldsOfEveryLine(["cut"], ["-d", ":", "-f", "0"]);
+    const actual = extractFieldsOfEveryLine(["cut"], {
+      delimiter: ":",
+      field: "0"
+    });
     const expected = { error: "cut: [-cf] list: values may not include zero" };
     assert.deepStrictEqual(actual, expected);
   });
   it(`should give error in the object if the field is not a number`, () => {
-    const actual = extractFieldsOfEveryLine(["cut"], ["-d", ":", "-f", "a"]);
+    const actual = extractFieldsOfEveryLine(["cut"], {
+      delimiter: ":",
+      field: "a"
+    });
     const expected = { error: "cut: [-cf] list: illegal list value" };
     assert.deepStrictEqual(actual, expected);
   });
@@ -67,41 +71,109 @@ describe("parseContent", function() {
   });
 });
 
-describe("readFileName", function() {
-  it("should give filename for the given options", function() {
-    const options = ["-d", ":", "-f", "2", "fileToCut1.txt"];
-    assert.strictEqual(readFileName(options), "fileToCut1.txt");
-  });
-});
-
-describe("readCutOptions", function() {
+describe("parseOptions", function() {
   it("should give the options for cut given", function() {
     const options = ["-d", ":", "-f", "2", "fileToCut1.txt"];
-    const expected = ["-d", ":", "-f", "2"];
-    assert.deepStrictEqual(readCutOptions(options), expected);
+    const expected = { delimiter: ":", field: "2", filename: "fileToCut1.txt" };
+    assert.deepStrictEqual(parseOptions(options), expected);
   });
 });
 
 describe("readFileContent", function() {
   it("should give the same data given", function() {
-    const read = data => {
+    const readFileSync = data => {
       assert.strictEqual(data, "cut\nthis");
       return data;
     };
-    const isExists = filename =>
+    const existsSync = filename =>
       assert.strictEqual(filename, "cut\nthis") || true;
-    assert.deepStrictEqual(readFileContent(read, isExists, "cut\nthis"), {
-      content: "cut\nthis"
-    });
+    assert.deepStrictEqual(
+      readFileContent({ readFileSync, existsSync }, "cut\nthis"),
+      {
+        content: "cut\nthis"
+      }
+    );
   });
   it("should throw an error for the file not exists", function() {
-    const read = data => {
+    const readFileSync = data => {
       assert.strictEqual(data, "cut\nthis");
       return data;
     };
-    const isExists = filename => assert.strictEqual(filename, "file") || false;
-    assert.deepStrictEqual(readFileContent(read, isExists, "file"), {
-      error: `cut: file: No such file or directory`
-    });
+    const existsSync = filename =>
+      assert.strictEqual(filename, "file") || false;
+    assert.deepStrictEqual(
+      readFileContent({ readFileSync, existsSync }, "file"),
+      {
+        error: `cut: file: No such file or directory`
+      }
+    );
+  });
+});
+
+describe("performCut", function() {
+  it("should give error for file not found", function() {
+    const readFileSync = data => {};
+    const existsSync = file => {
+      assert.strictEqual(file, `badFile.txt`);
+      return false;
+    };
+    const expected = {
+      error: `cut: badFile.txt: No such file or directory`
+    };
+    assert.deepStrictEqual(
+      cut({ readFileSync, existsSync }, ["-d", ":", "-f", "1", "badFile.txt"]),
+      expected
+    );
+  });
+  it("should give error for field list is zero", function() {
+    const readFileSync = data => {
+      assert.strictEqual(data, "cut:this");
+      return data;
+    };
+    const existsSync = file => {
+      assert.strictEqual(file, `cut:this`);
+      return true;
+    };
+    const expected = {
+      error: `cut: [-cf] list: values may not include zero`
+    };
+    assert.deepStrictEqual(
+      cut({ readFileSync, existsSync }, ["-d", ":", "-f", "0", "cut:this"]),
+      expected
+    );
+  });
+  it("should give error for field list is string", function() {
+    const readFileSync = data => {
+      assert.strictEqual(data, "cut:this");
+      return data;
+    };
+    const existsSync = file => {
+      assert.strictEqual(file, `cut:this`);
+      return true;
+    };
+    const expected = {
+      error: `cut: [-cf] list: illegal list value`
+    };
+    assert.deepStrictEqual(
+      cut({ readFileSync, existsSync }, ["-d", ":", "-f", "a", "cut:this"]),
+      expected
+    );
+  });
+  it("should give 2nd fields of the lines", function() {
+    const readFileSync = data => {
+      assert.strictEqual(data, "cut:this");
+      return data;
+    };
+    const existsSync = file => {
+      assert.strictEqual(file, `cut:this`);
+      return true;
+    };
+    const expected = {
+      cutLines: `this`
+    };
+    assert.deepStrictEqual(
+      cut({ readFileSync, existsSync }, ["-d", ":", "-f", "2", "cut:this"]),
+      expected
+    );
   });
 });

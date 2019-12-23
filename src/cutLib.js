@@ -1,21 +1,15 @@
-const extractFieldForLine = function(line) {
+const extractLinePortion = function(line) {
   if (!line.includes(this.delimiter)) return line;
   const splitLine = line.split(this.delimiter);
-  let extractedField = "";
-  const lastField = splitLine[this.newField - 1];
-  lastField && (extractedField = lastField);
-  return extractedField;
+  return splitLine[+this.field - 1] || "";
 };
 
 const extractFieldsOfEveryLine = (lines, cutOptions) => {
-  const [, delimiter, , field] = cutOptions;
-  const newField = +field;
   const fieldZero = { error: "cut: [-cf] list: values may not include zero" };
-  const fieldNotNumErr = { error: "cut: [-cf] list: illegal list value" };
-  if (newField == 0) return fieldZero;
-  if (!Number.isInteger(newField)) return fieldNotNumErr;
-  const extractField = extractFieldForLine.bind({ delimiter, newField });
-  const extractedLines = lines.map(extractField);
+  const { field } = cutOptions;
+  if (+field == 0) return fieldZero;
+  if (isNaN(+field)) return { error: "cut: [-cf] list: illegal list value" };
+  const extractedLines = lines.map(extractLinePortion.bind(cutOptions));
   return { extractedLines };
 };
 
@@ -23,24 +17,31 @@ const parseContent = content => {
   return content.split(`\n`);
 };
 
-const readFileName = options => {
-  const [, , , , filename] = options;
-  return filename;
+const parseOptions = options => {
+  const [, delimiter, , field, filename] = options;
+  return { delimiter, field, filename };
 };
 
-const readCutOptions = options => {
-  return options.slice(0, -1);
-};
-
-const readFileContent = (readFile, isFileExists, filename) => {
-  if (isFileExists(filename)) return { content: readFile(filename, "utf8") };
+const readFileContent = ({ readFileSync, existsSync }, filename) => {
+  if (existsSync(filename)) return { content: readFileSync(filename, "utf8") };
   return { error: `cut: ${filename}: No such file or directory` };
+};
+
+const cut = (fileSys, options) => {
+  const parsedOptions = parseOptions(options);
+  let { content, error } = readFileContent(fileSys, parsedOptions.filename);
+  if (error) return { error };
+  const parsedContent = parseContent(content);
+  const linePortions = extractFieldsOfEveryLine(parsedContent, parsedOptions);
+  if (linePortions.error) return { error: linePortions.error };
+  const cutLines = linePortions.extractedLines.join("\n");
+  return { cutLines };
 };
 
 module.exports = {
   extractFieldsOfEveryLine,
   parseContent,
-  readFileName,
-  readCutOptions,
-  readFileContent
+  parseOptions,
+  readFileContent,
+  cut
 };
