@@ -1,9 +1,20 @@
 const joinLines = extractedFields => extractedFields.join("\n");
 
-const extractFieldsOfEachLine = (lines, cutOptions) => {
-  const delimiter = cutOptions[1];
-  const field = cutOptions[3];
-  return lines.map(line => line.split(delimiter)[field - 1]);
+const extractFieldForLine = function(line) {
+  if (!line.includes(this.delimiter)) return line;
+  const splitLine = line.split(this.delimiter);
+  let extractedField = "";
+  splitLine[this.field - 1] && (extractedField = splitLine[this.field - 1]);
+  return extractedField;
 };
 
-module.exports = { joinLines, extractFieldsOfEachLine };
+const extractFieldsOfEveryLine = (lines, cutOptions) => {
+  const [, delimiter, , field] = cutOptions;
+  return lines.map(extractFieldForLine.bind({ delimiter, field }));
+};
+
+const parseContent = content => {
+  return content.split(`\n`);
+};
+
+module.exports = { joinLines, extractFieldsOfEveryLine, parseContent };
