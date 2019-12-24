@@ -13,28 +13,28 @@ describe("cutReqPortions", function() {
       delimiter: ":",
       field: "2"
     });
-    assert.deepStrictEqual(actual, { requiredFields: ["this"] });
+    assert.deepStrictEqual(actual, { cutPortions: ["this"] });
   });
   it("should give empty line for field not found in line", function() {
     const actual = cutReqPortions(["cut:this"], {
       delimiter: ":",
       field: "4"
     });
-    assert.deepStrictEqual(actual, { requiredFields: [""] });
+    assert.deepStrictEqual(actual, { cutPortions: [""] });
   });
   it("should give whole line for delimiter not found", function() {
     const actual = cutReqPortions(["cut:this"], {
       delimiter: ",",
       field: "4"
     });
-    assert.deepStrictEqual(actual, { requiredFields: ["cut:this"] });
+    assert.deepStrictEqual(actual, { cutPortions: ["cut:this"] });
   });
   it("should extract one field from each line for more than one line", function() {
     const actual = cutReqPortions(["cut:this", "this:cut", "hello:hi"], {
       delimiter: ":",
       field: "2"
     });
-    assert.deepStrictEqual(actual, { requiredFields: ["this", "cut", "hi"] });
+    assert.deepStrictEqual(actual, { cutPortions: ["this", "cut", "hi"] });
   });
   it(`should give error in the object if the field is 0`, () => {
     const actual = cutReqPortions(["cut"], {

@@ -9,8 +9,8 @@ const cutReqPortions = (lines, cutOptions) => {
   const { field } = cutOptions;
   if (field == 0) return colZeroErr;
   if (isNaN(+field)) return { error: "cut: [-cf] list: illegal list value" };
-  const requiredFields = lines.map(extractLinePortion.bind(cutOptions));
-  return { requiredFields };
+  const cutPortions = lines.map(extractLinePortion.bind(cutOptions));
+  return { cutPortions };
 };
 
 const parseOptions = options => {
@@ -24,17 +24,17 @@ const readFileContent = ({ readFileSync, existsSync }, filename) => {
   return { error: `cut: ${filename}: No such file or directory` };
 };
 
-const generateCutLines = requiredFields => {
-  return requiredFields.join("\n");
+const generateCutLines = cutPortions => {
+  return cutPortions.join("\n");
 };
 
-const cut = (fileSys, options) => {
+const cut = (fileSystem, options) => {
   const parsedOptions = parseOptions(options);
-  let { content, error } = readFileContent(fileSys, parsedOptions.filename);
+  let { content, error } = readFileContent(fileSystem, parsedOptions.filename);
   if (error) return { error };
   const linePortions = cutReqPortions(content, parsedOptions);
   if (linePortions.error) return { error: linePortions.error };
-  return { cutLines: generateCutLines(linePortions.requiredFields) };
+  return { cutLines: generateCutLines(linePortions.cutPortions) };
 };
 
 module.exports = {
