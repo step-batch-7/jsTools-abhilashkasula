@@ -1,10 +1,10 @@
-const { cut } = require("./src/cutLib");
-const { readFileSync, existsSync } = require(`fs`);
+const fs = require(`fs`);
 const { stdout, stderr, argv } = require("process");
+const { cut } = require("./src/cutLib");
 
 const main = () => {
-  const { cutLines, error } = cut({ readFileSync, existsSync }, argv.slice(2));
-  stdout.write(cutLines);
+  const { error, rowsOfCols } = cut(fs, argv.slice(2));
+  stdout.write(rowsOfCols);
   stderr.write(error);
 };
 

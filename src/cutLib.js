@@ -1,16 +1,18 @@
-const extractLinePortion = function(line) {
+const cutRowOfCol = function(line) {
   if (!line.includes(this.delimiter)) return line;
   const splitLine = line.split(this.delimiter);
   return splitLine[+this.field - 1] || "";
 };
 
-const cutReqPortions = (lines, cutOptions) => {
-  const colZeroErr = { error: "cut: [-cf] list: values may not include zero" };
+const cutRowsOfCols = (lines, cutOptions) => {
+  let rowsOfCols = "";
+  const colZeroErr = "cut: [-cf] list: values may not include zero";
+  const notANumberErr = "cut: [-cf] list: illegal list value";
   const { field } = cutOptions;
-  if (field == 0) return colZeroErr;
-  if (isNaN(+field)) return { error: "cut: [-cf] list: illegal list value" };
-  const cutPortions = lines.map(extractLinePortion.bind(cutOptions));
-  return { cutPortions };
+  if (field == 0) return { error: colZeroErr, rowsOfCols };
+  if (isNaN(+field)) return { error: notANumberErr, rowsOfCols };
+  rowsOfCols = lines.map(cutRowOfCol.bind(cutOptions)).join("\n");
+  return { error: "", rowsOfCols };
 };
 
 const parseOptions = options => {
@@ -20,27 +22,21 @@ const parseOptions = options => {
 
 const readFileContent = ({ readFileSync, existsSync }, filename) => {
   if (existsSync(filename))
-    return { content: readFileSync(filename, "utf8").split("\n") };
+    return { lines: readFileSync(filename, "utf8").split("\n") };
   return { error: `cut: ${filename}: No such file or directory` };
 };
 
-const generateCutLines = cutPortions => {
-  return cutPortions.join("\n");
-};
-
 const cut = (fileSystem, options) => {
-  const parsedOptions = parseOptions(options);
-  let { content, error } = readFileContent(fileSystem, parsedOptions.filename);
-  if (error) return { error, cutLines: "" };
-  const linePortions = cutReqPortions(content, parsedOptions);
-  if (linePortions.error) return { error: linePortions.error, cutLines: "" };
-  return { cutLines: generateCutLines(linePortions.cutPortions), error: "" };
+  const rowsOfCols = "";
+  const cutOptions = parseOptions(options);
+  let { lines, error } = readFileContent(fileSystem, cutOptions.filename);
+  if (error) return { error, rowsOfCols };
+  return cutRowsOfCols(lines, cutOptions);
 };
 
 module.exports = {
-  cutReqPortions,
+  cutRowsOfCols,
   parseOptions,
   readFileContent,
-  cut,
-  generateCutLines
+  cut
 };

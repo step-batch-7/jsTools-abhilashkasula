@@ -1,55 +1,65 @@
 const { assert } = require("chai");
 const {
-  cutReqPortions,
+  cutRowsOfCols,
   parseOptions,
   readFileContent,
-  cut,
-  generateCutLines
+  cut
 } = require("../src/cutLib.js");
 
-describe("cutReqPortions", function() {
+describe("cutRowsOfCols", function() {
   it("should extract one field for only one line", function() {
-    const actual = cutReqPortions(["cut:this"], {
+    const actual = cutRowsOfCols(["cut:this"], {
       delimiter: ":",
       field: "2"
     });
-    assert.deepStrictEqual(actual, { cutPortions: ["this"] });
+    assert.deepStrictEqual(actual, { error: "", rowsOfCols: "this" });
   });
+
   it("should give empty line for field not found in line", function() {
-    const actual = cutReqPortions(["cut:this"], {
+    const actual = cutRowsOfCols(["cut:this"], {
       delimiter: ":",
       field: "4"
     });
-    assert.deepStrictEqual(actual, { cutPortions: [""] });
+    assert.deepStrictEqual(actual, { error: "", rowsOfCols: "" });
   });
+
   it("should give whole line for delimiter not found", function() {
-    const actual = cutReqPortions(["cut:this"], {
+    const actual = cutRowsOfCols(["cut:this"], {
       delimiter: ",",
       field: "4"
     });
-    assert.deepStrictEqual(actual, { cutPortions: ["cut:this"] });
+    assert.deepStrictEqual(actual, { error: "", rowsOfCols: "cut:this" });
   });
+
   it("should extract one field from each line for more than one line", function() {
-    const actual = cutReqPortions(["cut:this", "this:cut", "hello:hi"], {
+    const actual = cutRowsOfCols(["cut:this", "this:cut", "hello:hi"], {
       delimiter: ":",
       field: "2"
     });
-    assert.deepStrictEqual(actual, { cutPortions: ["this", "cut", "hi"] });
+    assert.deepStrictEqual(actual, { error: "", rowsOfCols: "this\ncut\nhi" });
   });
+
   it(`should give error in the object if the field is 0`, () => {
-    const actual = cutReqPortions(["cut"], {
+    const actual = cutRowsOfCols(["cut"], {
       delimiter: ":",
       field: "0"
     });
-    const expected = { error: "cut: [-cf] list: values may not include zero" };
+    const expected = {
+      error: "cut: [-cf] list: values may not include zero",
+      rowsOfCols: ""
+    };
     assert.deepStrictEqual(actual, expected);
   });
+
   it(`should give error in the object if the field is not a number`, () => {
-    const actual = cutReqPortions(["cut"], {
+    const actual = cutRowsOfCols(["cut"], {
       delimiter: ":",
       field: "a"
     });
-    const expected = { error: "cut: [-cf] list: illegal list value" };
+    const expected = {
+      error: "cut: [-cf] list: illegal list value",
+      rowsOfCols: ""
+    };
     assert.deepStrictEqual(actual, expected);
   });
 });
@@ -73,7 +83,7 @@ describe("readFileContent", function() {
     assert.deepStrictEqual(
       readFileContent({ readFileSync, existsSync }, "cut\nthis"),
       {
-        content: ["cut", "this"]
+        lines: ["cut", "this"]
       }
     );
   });
@@ -102,7 +112,7 @@ describe("cut", function() {
     };
     const expected = {
       error: `cut: badFile.txt: No such file or directory`,
-      cutLines: ""
+      rowsOfCols: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "1", "badFile.txt"]),
@@ -120,7 +130,7 @@ describe("cut", function() {
     };
     const expected = {
       error: `cut: [-cf] list: values may not include zero`,
-      cutLines: ""
+      rowsOfCols: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "0", "cut:this"]),
@@ -138,7 +148,7 @@ describe("cut", function() {
     };
     const expected = {
       error: `cut: [-cf] list: illegal list value`,
-      cutLines: ""
+      rowsOfCols: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "a", "cut:this"]),
@@ -155,24 +165,12 @@ describe("cut", function() {
       return true;
     };
     const expected = {
-      cutLines: `this`,
+      rowsOfCols: `this`,
       error: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "2", "cut:this"]),
       expected
-    );
-  });
-});
-
-describe("generateCutLines", function() {
-  it("should give string representation for only one line given", function() {
-    assert.strictEqual(generateCutLines(["line1"]), "line1");
-  });
-  it(`should give string representation for more than one line given`, () => {
-    assert.strictEqual(
-      generateCutLines([`line1`, `line2`, `line3`]),
-      `line1\nline2\nline3`
     );
   });
 });

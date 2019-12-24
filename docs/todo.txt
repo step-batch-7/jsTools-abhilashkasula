@@ -22,6 +22,3 @@ v0.1
     --done-- cutReqPortions
     --done-- readFileContent 
     --done-- parseOptions
-
-v0.2
-cat fileToCut.txt | node cut.js -d : -f 2
