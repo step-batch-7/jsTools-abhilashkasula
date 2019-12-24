@@ -1,43 +1,43 @@
 const { assert } = require("chai");
 const {
-  extractFieldsOfEveryLine,
-  parseContent,
+  getReqPortions,
   parseOptions,
   readFileContent,
-  cut
+  cut,
+  generateCutLines
 } = require("../src/cutLib.js");
 
 describe("extractFieldsOfEveryLine", function() {
   it("should extract one field for only one line", function() {
-    const actual = extractFieldsOfEveryLine(["cut:this"], {
+    const actual = getReqPortions(["cut:this"], {
       delimiter: ":",
       field: "2"
     });
-    assert.deepStrictEqual(actual, { extractedLines: ["this"] });
+    assert.deepStrictEqual(actual, { requiredFields: ["this"] });
   });
   it("should give empty line for field not found in line", function() {
-    const actual = extractFieldsOfEveryLine(["cut:this"], {
+    const actual = getReqPortions(["cut:this"], {
       delimiter: ":",
       field: "4"
     });
-    assert.deepStrictEqual(actual, { extractedLines: [""] });
+    assert.deepStrictEqual(actual, { requiredFields: [""] });
   });
   it("should give whole line for delimiter not found", function() {
-    const actual = extractFieldsOfEveryLine(["cut:this"], {
+    const actual = getReqPortions(["cut:this"], {
       delimiter: ",",
       field: "4"
     });
-    assert.deepStrictEqual(actual, { extractedLines: ["cut:this"] });
+    assert.deepStrictEqual(actual, { requiredFields: ["cut:this"] });
   });
   it("should extract one field from each line for more than one line", function() {
-    const actual = extractFieldsOfEveryLine(
-      ["cut:this", "this:cut", "hello:hi"],
-      { delimiter: ":", field: "2" }
-    );
-    assert.deepStrictEqual(actual, { extractedLines: ["this", "cut", "hi"] });
+    const actual = getReqPortions(["cut:this", "this:cut", "hello:hi"], {
+      delimiter: ":",
+      field: "2"
+    });
+    assert.deepStrictEqual(actual, { requiredFields: ["this", "cut", "hi"] });
   });
   it(`should give error in the object if the field is 0`, () => {
-    const actual = extractFieldsOfEveryLine(["cut"], {
+    const actual = getReqPortions(["cut"], {
       delimiter: ":",
       field: "0"
     });
@@ -45,29 +45,12 @@ describe("extractFieldsOfEveryLine", function() {
     assert.deepStrictEqual(actual, expected);
   });
   it(`should give error in the object if the field is not a number`, () => {
-    const actual = extractFieldsOfEveryLine(["cut"], {
+    const actual = getReqPortions(["cut"], {
       delimiter: ":",
       field: "a"
     });
     const expected = { error: "cut: [-cf] list: illegal list value" };
     assert.deepStrictEqual(actual, expected);
-  });
-});
-
-describe("parseContent", function() {
-  it("should give only one line for no new line character in the given string", function() {
-    assert.deepStrictEqual(parseContent(`cut`), ["cut"]);
-  });
-  it(`should give two lines in an array for only one new line character in the given string`, () => {
-    assert.deepStrictEqual(parseContent(`cut\nthis`), ["cut", "this"]);
-  });
-  it(`should give lines in an array for more than one new line character in the given string`, () => {
-    assert.deepStrictEqual(parseContent(`cut\nthis\nright\nnow`), [
-      "cut",
-      "this",
-      "right",
-      "now"
-    ]);
   });
 });
 
@@ -90,7 +73,7 @@ describe("readFileContent", function() {
     assert.deepStrictEqual(
       readFileContent({ readFileSync, existsSync }, "cut\nthis"),
       {
-        content: "cut\nthis"
+        content: ["cut", "this"]
       }
     );
   });
@@ -174,6 +157,18 @@ describe("performCut", function() {
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "2", "cut:this"]),
       expected
+    );
+  });
+});
+
+describe("generateCutLines", function() {
+  it("should give string representation for only one line given", function() {
+    assert.strictEqual(generateCutLines(["line1"]), "line1");
+  });
+  it(`should give string representation for more than one line given`, () => {
+    assert.strictEqual(
+      generateCutLines([`line1`, `line2`, `line3`]),
+      `line1\nline2\nline3`
     );
   });
 });

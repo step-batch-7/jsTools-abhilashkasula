@@ -1,0 +1,2 @@
+node cut.js -d : -f 2 badFile.txt
+cut: badFile.txt: No such file or directory

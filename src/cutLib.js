@@ -4,17 +4,13 @@ const extractLinePortion = function(line) {
   return splitLine[+this.field - 1] || "";
 };
 
-const extractFieldsOfEveryLine = (lines, cutOptions) => {
-  const fieldZero = { error: "cut: [-cf] list: values may not include zero" };
+const getReqPortions = (lines, cutOptions) => {
+  const colZeroErr = { error: "cut: [-cf] list: values may not include zero" };
   const { field } = cutOptions;
-  if (+field == 0) return fieldZero;
+  if (field == 0) return colZeroErr;
   if (isNaN(+field)) return { error: "cut: [-cf] list: illegal list value" };
-  const extractedLines = lines.map(extractLinePortion.bind(cutOptions));
-  return { extractedLines };
-};
-
-const parseContent = content => {
-  return content.split(`\n`);
+  const requiredFields = lines.map(extractLinePortion.bind(cutOptions));
+  return { requiredFields };
 };
 
 const parseOptions = options => {
@@ -23,25 +19,28 @@ const parseOptions = options => {
 };
 
 const readFileContent = ({ readFileSync, existsSync }, filename) => {
-  if (existsSync(filename)) return { content: readFileSync(filename, "utf8") };
+  if (existsSync(filename))
+    return { content: readFileSync(filename, "utf8").split("\n") };
   return { error: `cut: ${filename}: No such file or directory` };
+};
+
+const generateCutLines = requiredFields => {
+  return requiredFields.join("\n");
 };
 
 const cut = (fileSys, options) => {
   const parsedOptions = parseOptions(options);
   let { content, error } = readFileContent(fileSys, parsedOptions.filename);
   if (error) return { error };
-  const parsedContent = parseContent(content);
-  const linePortions = extractFieldsOfEveryLine(parsedContent, parsedOptions);
+  const linePortions = getReqPortions(content, parsedOptions);
   if (linePortions.error) return { error: linePortions.error };
-  const cutLines = linePortions.extractedLines.join("\n");
-  return { cutLines };
+  return { cutLines: generateCutLines(linePortions.requiredFields) };
 };
 
 module.exports = {
-  extractFieldsOfEveryLine,
-  parseContent,
+  getReqPortions,
   parseOptions,
   readFileContent,
-  cut
+  cut,
+  generateCutLines
 };

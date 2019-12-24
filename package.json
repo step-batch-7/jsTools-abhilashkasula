@@ -9,7 +9,8 @@
   "scripts": {
     "test": "mocha",
     "cover": "nyc mocha",
-    "coverage": "nyc --reporter=html npm test"
+    "coverage": "nyc --reporter=html npm test",
+    "alltests": "npm test && ./runAppTests.sh appTests/*.test"
   },
   "repository": {
     "type": "git",
