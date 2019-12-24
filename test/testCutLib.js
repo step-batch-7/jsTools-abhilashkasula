@@ -93,7 +93,7 @@ describe("readFileContent", function() {
   });
 });
 
-describe("performCut", function() {
+describe("cut", function() {
   it("should give error for file not found", function() {
     const readFileSync = data => {};
     const existsSync = file => {
@@ -101,7 +101,8 @@ describe("performCut", function() {
       return false;
     };
     const expected = {
-      error: `cut: badFile.txt: No such file or directory`
+      error: `cut: badFile.txt: No such file or directory`,
+      cutLines: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "1", "badFile.txt"]),
@@ -118,7 +119,8 @@ describe("performCut", function() {
       return true;
     };
     const expected = {
-      error: `cut: [-cf] list: values may not include zero`
+      error: `cut: [-cf] list: values may not include zero`,
+      cutLines: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "0", "cut:this"]),
@@ -135,7 +137,8 @@ describe("performCut", function() {
       return true;
     };
     const expected = {
-      error: `cut: [-cf] list: illegal list value`
+      error: `cut: [-cf] list: illegal list value`,
+      cutLines: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "a", "cut:this"]),
@@ -152,7 +155,8 @@ describe("performCut", function() {
       return true;
     };
     const expected = {
-      cutLines: `this`
+      cutLines: `this`,
+      error: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "2", "cut:this"]),

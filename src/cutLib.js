@@ -31,10 +31,10 @@ const generateCutLines = cutPortions => {
 const cut = (fileSystem, options) => {
   const parsedOptions = parseOptions(options);
   let { content, error } = readFileContent(fileSystem, parsedOptions.filename);
-  if (error) return { error };
+  if (error) return { error, cutLines: "" };
   const linePortions = cutReqPortions(content, parsedOptions);
-  if (linePortions.error) return { error: linePortions.error };
-  return { cutLines: generateCutLines(linePortions.cutPortions) };
+  if (linePortions.error) return { error: linePortions.error, cutLines: "" };
+  return { cutLines: generateCutLines(linePortions.cutPortions), error: "" };
 };
 
 module.exports = {
