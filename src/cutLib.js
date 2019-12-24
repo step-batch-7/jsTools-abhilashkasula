@@ -4,7 +4,7 @@ const extractLinePortion = function(line) {
   return splitLine[+this.field - 1] || "";
 };
 
-const getReqPortions = (lines, cutOptions) => {
+const cutReqPortions = (lines, cutOptions) => {
   const colZeroErr = { error: "cut: [-cf] list: values may not include zero" };
   const { field } = cutOptions;
   if (field == 0) return colZeroErr;
@@ -32,13 +32,13 @@ const cut = (fileSys, options) => {
   const parsedOptions = parseOptions(options);
   let { content, error } = readFileContent(fileSys, parsedOptions.filename);
   if (error) return { error };
-  const linePortions = getReqPortions(content, parsedOptions);
+  const linePortions = cutReqPortions(content, parsedOptions);
   if (linePortions.error) return { error: linePortions.error };
   return { cutLines: generateCutLines(linePortions.requiredFields) };
 };
 
 module.exports = {
-  getReqPortions,
+  cutReqPortions,
   parseOptions,
   readFileContent,
   cut,

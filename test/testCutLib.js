@@ -1,43 +1,43 @@
 const { assert } = require("chai");
 const {
-  getReqPortions,
+  cutReqPortions,
   parseOptions,
   readFileContent,
   cut,
   generateCutLines
 } = require("../src/cutLib.js");
 
-describe("extractFieldsOfEveryLine", function() {
+describe("cutReqPortions", function() {
   it("should extract one field for only one line", function() {
-    const actual = getReqPortions(["cut:this"], {
+    const actual = cutReqPortions(["cut:this"], {
       delimiter: ":",
       field: "2"
     });
     assert.deepStrictEqual(actual, { requiredFields: ["this"] });
   });
   it("should give empty line for field not found in line", function() {
-    const actual = getReqPortions(["cut:this"], {
+    const actual = cutReqPortions(["cut:this"], {
       delimiter: ":",
       field: "4"
     });
     assert.deepStrictEqual(actual, { requiredFields: [""] });
   });
   it("should give whole line for delimiter not found", function() {
-    const actual = getReqPortions(["cut:this"], {
+    const actual = cutReqPortions(["cut:this"], {
       delimiter: ",",
       field: "4"
     });
     assert.deepStrictEqual(actual, { requiredFields: ["cut:this"] });
   });
   it("should extract one field from each line for more than one line", function() {
-    const actual = getReqPortions(["cut:this", "this:cut", "hello:hi"], {
+    const actual = cutReqPortions(["cut:this", "this:cut", "hello:hi"], {
       delimiter: ":",
       field: "2"
     });
     assert.deepStrictEqual(actual, { requiredFields: ["this", "cut", "hi"] });
   });
   it(`should give error in the object if the field is 0`, () => {
-    const actual = getReqPortions(["cut"], {
+    const actual = cutReqPortions(["cut"], {
       delimiter: ":",
       field: "0"
     });
@@ -45,7 +45,7 @@ describe("extractFieldsOfEveryLine", function() {
     assert.deepStrictEqual(actual, expected);
   });
   it(`should give error in the object if the field is not a number`, () => {
-    const actual = getReqPortions(["cut"], {
+    const actual = cutReqPortions(["cut"], {
       delimiter: ":",
       field: "a"
     });
