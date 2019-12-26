@@ -22,3 +22,8 @@ v0.1
     --done-- cutReqPortions
     --done-- readFileContent 
     --done-- parseOptions
+
+v0.2
+  tasks
+    rewrite the code in asynchronous.
+    readStdInContent
