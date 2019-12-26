@@ -1,64 +1,67 @@
 const { assert } = require("chai");
 const {
-  cutRowsOfCols,
+  cutRowsOfColumns,
   parseOptions,
   readFileContent,
   cut
 } = require("../src/cutLib.js");
 
-describe("cutRowsOfCols", function() {
+describe("cutRowsOfColumns", function() {
   it("should extract one field for only one line", function() {
-    const actual = cutRowsOfCols(["cut:this"], {
+    const actual = cutRowsOfColumns(["cut:this"], {
       delimiter: ":",
       field: "2"
     });
-    assert.deepStrictEqual(actual, { error: "", rowsOfCols: "this" });
+    assert.deepStrictEqual(actual, { error: "", rowsOfColumns: "this" });
   });
 
   it("should give empty line for field not found in line", function() {
-    const actual = cutRowsOfCols(["cut:this"], {
+    const actual = cutRowsOfColumns(["cut:this"], {
       delimiter: ":",
       field: "4"
     });
-    assert.deepStrictEqual(actual, { error: "", rowsOfCols: "" });
+    assert.deepStrictEqual(actual, { error: "", rowsOfColumns: "" });
   });
 
   it("should give whole line for delimiter not found", function() {
-    const actual = cutRowsOfCols(["cut:this"], {
+    const actual = cutRowsOfColumns(["cut:this"], {
       delimiter: ",",
       field: "4"
     });
-    assert.deepStrictEqual(actual, { error: "", rowsOfCols: "cut:this" });
+    assert.deepStrictEqual(actual, { error: "", rowsOfColumns: "cut:this" });
   });
 
   it("should extract one field from each line for more than one line", function() {
-    const actual = cutRowsOfCols(["cut:this", "this:cut", "hello:hi"], {
+    const actual = cutRowsOfColumns(["cut:this", "this:cut", "hello:hi"], {
       delimiter: ":",
       field: "2"
     });
-    assert.deepStrictEqual(actual, { error: "", rowsOfCols: "this\ncut\nhi" });
+    assert.deepStrictEqual(actual, {
+      error: "",
+      rowsOfColumns: "this\ncut\nhi"
+    });
   });
 
   it(`should give error in the object if the field is 0`, () => {
-    const actual = cutRowsOfCols(["cut"], {
+    const actual = cutRowsOfColumns(["cut"], {
       delimiter: ":",
       field: "0"
     });
     const expected = {
       error: "cut: [-cf] list: values may not include zero",
-      rowsOfCols: ""
+      rowsOfColumns: ""
     };
     assert.deepStrictEqual(actual, expected);
   });
 
   it(`should give error in the object if the field is not a number`, () => {
-    const actual = cutRowsOfCols(["cut"], {
+    const actual = cutRowsOfColumns(["cut"], {
       delimiter: ":",
       field: "a"
     });
     const expected = {
       error: "cut: [-cf] list: illegal list value",
-      rowsOfCols: ""
+      rowsOfColumns: ""
     };
     assert.deepStrictEqual(actual, expected);
   });
@@ -112,7 +115,7 @@ describe("cut", function() {
     };
     const expected = {
       error: `cut: badFile.txt: No such file or directory`,
-      rowsOfCols: ""
+      rowsOfColumns: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "1", "badFile.txt"]),
@@ -130,7 +133,7 @@ describe("cut", function() {
     };
     const expected = {
       error: `cut: [-cf] list: values may not include zero`,
-      rowsOfCols: ""
+      rowsOfColumns: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "0", "cut:this"]),
@@ -148,7 +151,7 @@ describe("cut", function() {
     };
     const expected = {
       error: `cut: [-cf] list: illegal list value`,
-      rowsOfCols: ""
+      rowsOfColumns: ""
     };
     assert.deepStrictEqual(
       cut({ readFileSync, existsSync }, ["-d", ":", "-f", "a", "cut:this"]),
@@ -165,7 +168,7 @@ describe("cut", function() {
       return true;
     };
     const expected = {
-      rowsOfCols: `this`,
+      rowsOfColumns: `this`,
       error: ""
     };
     assert.deepStrictEqual(
