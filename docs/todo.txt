@@ -26,5 +26,10 @@ v0.1
 v0.2
 cat fileToCut.txt | node cut.js -d : -f 2
   tasks
-    rewrite the code in asynchronous.
+    change readFileSync to readFile
     readStdInContent
+    modify cut - it should decide to take stdin or file
+    give standard input
+    update tests according to the changes made
+    have to give input stream to the reader to load stdin
+    have to pass a function which can perform printing of both error and output.
