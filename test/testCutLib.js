@@ -41,30 +41,6 @@ describe("cutRowsOfColumns", function() {
       rowsOfColumns: "this\ncut\nhi"
     });
   });
-
-  it(`should give error in the object if the field is 0`, () => {
-    const actual = cutRowsOfColumns(["cut"], {
-      delimiter: ":",
-      field: "0"
-    });
-    const expected = {
-      error: "cut: [-cf] list: values may not include zero",
-      rowsOfColumns: ""
-    };
-    assert.deepStrictEqual(actual, expected);
-  });
-
-  it(`should give error in the object if the field is not a number`, () => {
-    const actual = cutRowsOfColumns(["cut"], {
-      delimiter: ":",
-      field: "a"
-    });
-    const expected = {
-      error: "cut: [-cf] list: illegal list value",
-      rowsOfColumns: ""
-    };
-    assert.deepStrictEqual(actual, expected);
-  });
 });
 
 describe("parseOptions", function() {
@@ -72,6 +48,30 @@ describe("parseOptions", function() {
     const options = ["-d", ":", "-f", "2", "fileToCut1.txt"];
     const expected = { delimiter: ":", field: "2", filename: "fileToCut1.txt" };
     assert.deepStrictEqual(parseOptions(options), expected);
+  });
+
+  it(`should give error in the object if the field is 0`, () => {
+    const actual = parseOptions(["-d", ":", "-f", "0", "filename"]);
+    const expected = {
+      error: "cut: [-cf] list: values may not include zero"
+    };
+    assert.deepStrictEqual(actual, expected);
+  });
+
+  it(`should give error in the object if the field is not a number`, () => {
+    const actual = parseOptions(["-d", ":", "-f", "a", "filename"]);
+    const expected = {
+      error: "cut: [-cf] list: illegal list value"
+    };
+    assert.deepStrictEqual(actual, expected);
+  });
+
+  it(`should give error in the object if the delimiter is not given`, () => {
+    const actual = parseOptions(["-d", "-f", "1", "filename"]);
+    const expected = {
+      error: "cut: bad delimiter"
+    };
+    assert.deepStrictEqual(actual, expected);
   });
 });
 

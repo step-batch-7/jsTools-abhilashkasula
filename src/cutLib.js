@@ -6,19 +6,17 @@ const cutRowOfColumn = function(line) {
 };
 
 const cutRowsOfColumns = (lines, cutOptions) => {
-  let rowsOfColumns = "";
-  const error = "";
-  const columnZeroErr = "cut: [-cf] list: values may not include zero";
-  const notANumberErr = "cut: [-cf] list: illegal list value";
-  const { field } = cutOptions;
-  if (field == 0) return { error: columnZeroErr, rowsOfColumns };
-  if (isNaN(+field)) return { error: notANumberErr, rowsOfColumns };
+  const error = ``;
   rowsOfColumns = lines.map(cutRowOfColumn.bind(cutOptions)).join("\n");
   return { error, rowsOfColumns };
 };
 
 const parseOptions = options => {
   const [, delimiter, , field, filename] = options;
+  if (delimiter == "-f") return { error: `cut: bad delimiter` };
+  if (field == 0)
+    return { error: `cut: [-cf] list: values may not include zero` };
+  if (isNaN(+field)) return { error: `cut: [-cf] list: illegal list value` };
   return { delimiter, field, filename };
 };
 
@@ -31,6 +29,7 @@ const readFileContent = ({ readFileSync, existsSync }, filename) => {
 const cut = (fileSystem, options) => {
   const rowsOfColumns = "";
   const cutOptions = parseOptions(options);
+  if (cutOptions.error) return { error: cutOptions.error, rowsOfColumns };
   let { lines, error } = readFileContent(fileSystem, cutOptions.filename);
   if (error) return { error, rowsOfColumns };
   return cutRowsOfColumns(lines, cutOptions);
