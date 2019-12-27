@@ -24,6 +24,7 @@ v0.1
     --done-- parseOptions
 
 v0.2
+cat fileToCut.txt | node cut.js -d : -f 2
   tasks
     rewrite the code in asynchronous.
     readStdInContent
