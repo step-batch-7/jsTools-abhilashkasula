@@ -7,7 +7,8 @@ const cutRowOfColumn = function(line) {
 
 const cutRowsOfColumns = (lines, cutOptions) => {
   const error = ``;
-  rowsOfColumns = lines.map(cutRowOfColumn.bind(cutOptions)).join("\n");
+  const replyWithRow = cutRowOfColumn.bind(cutOptions);
+  const rowsOfColumns = lines.map(replyWithRow).join("\n");
   return { error, rowsOfColumns };
 };
 
@@ -20,24 +21,29 @@ const parseOptions = options => {
   return { delimiter, field, filename };
 };
 
-const readFileContent = ({ readFileSync, existsSync }, filename) => {
-  if (existsSync(filename))
-    return { lines: readFileSync(filename, "utf8").split("\n") };
-  return { error: `cut: ${filename}: No such file or directory` };
+const readContent = function(err, content) {
+  const { filename } = this.cutOptions;
+  const rowsOfColumns = ``;
+  const error = `cut: ${filename}: No such file or directory`;
+  if (err) return this.onComplete({ error, rowsOfColumns });
+  const lines = content.split("\n");
+  this.onComplete(cutRowsOfColumns(lines, this.cutOptions));
 };
 
-const cut = (fileSystem, options) => {
-  const rowsOfColumns = "";
+const cut = (readFile, options, onComplete) => {
   const cutOptions = parseOptions(options);
-  if (cutOptions.error) return { error: cutOptions.error, rowsOfColumns };
-  let { lines, error } = readFileContent(fileSystem, cutOptions.filename);
-  if (error) return { error, rowsOfColumns };
-  return cutRowsOfColumns(lines, cutOptions);
+  const rowsOfColumns = "";
+  if (cutOptions.error) {
+    onComplete({ error: cutOptions.error, rowsOfColumns });
+    return;
+  }
+  const readFileContent = readContent.bind({ cutOptions, onComplete });
+  readFile(cutOptions.filename, "utf8", readFileContent);
 };
 
 module.exports = {
   cutRowsOfColumns,
   parseOptions,
-  readFileContent,
+  readContent,
   cut
 };

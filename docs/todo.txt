@@ -26,7 +26,7 @@ v0.1
 v0.2
 cat fileToCut.txt | node cut.js -d : -f 2
   tasks
-    change readFileSync to readFile
+    --done-- change readFileSync to readFile
     readStdInContent
     modify cut - it should decide to take stdin or file
     give standard input
