@@ -10,7 +10,8 @@
     "test": "mocha",
     "cover": "nyc mocha",
     "coverage": "nyc --reporter=html npm test",
-    "alltests": "npm test && ./runAppTests.sh appTests/*.test"
+    "alltests": "npm test && ./runAppTests.sh appTests/*.test",
+    "lint": "eslint src test"
   },
   "repository": {
     "type": "git",
