@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const sinon = require('sinon');
 const {
   cutRowsOfColumns,
   parseOptions,
@@ -27,14 +28,10 @@ describe('cutRowsOfColumns', function() {
 
   it('should extract one field from each line for more than one line', () => {
     const cutOptions = { field: '2', delimiter: ':' };
-    const actual = cutRowsOfColumns(
-      ['cut:this', 'this:cut', 'hello:hi'],
-      cutOptions
-    );
-    assert.deepStrictEqual(actual, {
-      error: '',
-      rowsOfColumns: 'this\ncut\nhi'
-    });
+    const options = ['cut:this', 'this:cut', 'hello:hi'];
+    const actual = cutRowsOfColumns(options, cutOptions);
+    const expected = { error: '', rowsOfColumns: 'this\ncut\nhi' };
+    assert.deepStrictEqual(actual, expected);
   });
 });
 
@@ -47,153 +44,107 @@ describe('parseOptions', function() {
 
   it('should give error in the object if the field is 0', () => {
     const actual = parseOptions(['-d', ':', '-f', '0', 'filename']);
-    const expected = {
-      error: 'cut: [-cf] list: values may not include zero'
-    };
+    const expected = { error: 'cut: [-cf] list: values may not include zero' };
     assert.deepStrictEqual(actual, expected);
   });
 
   it('should give error in the object if the field is not a number', () => {
     const actual = parseOptions(['-d', ':', '-f', 'a', 'filename']);
-    const expected = {
-      error: 'cut: [-cf] list: illegal list value'
-    };
+    const expected = { error: 'cut: [-cf] list: illegal list value' };
     assert.deepStrictEqual(actual, expected);
   });
 
   it('should give error in the object if the delimiter is not given', () => {
     const actual = parseOptions(['-d', '-f', '1', 'filename']);
-    const expected = {
-      error: 'cut: bad delimiter'
-    };
+    const expected = { error: 'cut: bad delimiter' };
     assert.deepStrictEqual(actual, expected);
   });
 });
 
 describe('readContent', function() {
   it('should give error to onComplete for file not found', function() {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, 'cut: badFile: No such file or directory');
-      assert.strictEqual(rowsOfColumns, '');
-    };
     const cutOptions = { delimiter: ':', field: '2', filename: 'badFile' };
+    const onComplete = sinon.spy();
     readContent.call({ cutOptions, onComplete }, 'ENOENT', '');
+    const error = 'cut: badFile: No such file or directory';
+    const parametersToOnComplete = {error, rowsOfColumns: ''};
+    assert.isTrue(onComplete.calledWith(parametersToOnComplete));
   });
 
   it('should give result to onComplete when options are found in line', () => {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, '');
-      assert.strictEqual(rowsOfColumns, 'this\ncut\nhi');
-    };
     const cutOptions = { delimiter: ':', field: '2', filename: 'fileToCut' };
-    readContent.call(
-      { cutOptions, onComplete },
-      undefined,
-      'cut:this\nthis:cut\nhello:hi'
-    );
+    const onComplete = sinon.spy();
+    const fileContent = 'cut:this\nthis:cut\nhello:hi';
+    readContent.call( { cutOptions, onComplete }, undefined, fileContent );
+    const rowsOfColumns = 'this\ncut\nhi';
+    const parametersToOnComplete = {error: '', rowsOfColumns};
+    assert.isTrue(onComplete.calledWith(parametersToOnComplete));
   });
 
   it('should give empty to onComplete for given field is not found', () => {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, '');
-      assert.strictEqual(rowsOfColumns, '');
-    };
     const cutOptions = { delimiter: ':', field: '100', filename: 'fileToCut' };
+    const onComplete = sinon.spy();
     readContent.call({ cutOptions, onComplete }, undefined, 'cut:this');
+    assert.isTrue(onComplete.calledWith({error: '', rowsOfColumns: ''}));
   });
 
   it('should give whole line to onComplete for delimiter is not found', () => {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, '');
-      assert.strictEqual(rowsOfColumns, 'cut:this');
-    };
     const cutOptions = { delimiter: ',', field: '2', filename: 'fileToCut' };
+    const onComplete = sinon.spy();
     readContent.call({ cutOptions, onComplete }, undefined, 'cut:this');
+    assert(onComplete.calledWith({error: '', rowsOfColumns: 'cut:this'}));
   });
 });
 
 describe('cut', function() {
   it('should give error to onComplete for file not found', function() {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, 'cut: badFile: No such file or directory');
-      assert.strictEqual(rowsOfColumns, '');
-    };
-    const readFile = (path, encoding, callback) => {
-      assert.strictEqual(path, 'badFile');
-      assert.strictEqual(encoding, 'utf8');
-      callback('ENOENT', '');
-    };
     const options = ['-d', ':', '-f', '2', 'badFile'];
+    const onComplete = sinon.spy();
+    const readFile = sinon.fake.yields('ENOENT', undefined);
     cut(readFile, options, onComplete);
+    const error = 'cut: badFile: No such file or directory';
+    assert(onComplete.calledWith({error, rowsOfColumns: ''}));
   });
 
   it('should give result to onComplete for given options are found', () => {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, '');
-      assert.strictEqual(rowsOfColumns, 'this\ncut');
-    };
-    const readFile = (path, encoding, callback) => {
-      assert.strictEqual(path, 'file');
-      assert.strictEqual(encoding, 'utf8');
-      callback(undefined, 'cut:this\nthis:cut');
-    };
     const options = ['-d', ':', '-f', '2', 'file'];
+    const onComplete = sinon.spy();
+    const readFile = sinon.fake.yields(null, 'cut:this\nthis:cut');
     cut(readFile, options, onComplete);
+    assert(onComplete.calledWith({error: '', rowsOfColumns: 'this\ncut'}));
   });
 
   it('should give empty lines to onComplete for field is not found', () => {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, '');
-      assert.strictEqual(rowsOfColumns, '');
-    };
-    const readFile = (path, encoding, callback) => {
-      assert.strictEqual(path, 'file');
-      assert.strictEqual(encoding, 'utf8');
-      callback(undefined, 'cut:this');
-    };
     const options = ['-d', ':', '-f', '100', 'file'];
+    const onComplete = sinon.spy();
+    const readFile = sinon.fake.yields(null, 'cut:this');
     cut(readFile, options, onComplete);
+    assert(onComplete.calledWith({error: '', rowsOfColumns: ''}));
   });
 
   it('should give whole lines to onComplete for delimiter is not found', () => {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, '');
-      assert.strictEqual(rowsOfColumns, 'cut:this');
-    };
-    const readFile = (path, encoding, callback) => {
-      assert.strictEqual(path, 'file');
-      assert.strictEqual(encoding, 'utf8');
-      callback(undefined, 'cut:this');
-    };
     const options = ['-d', ',', '-f', '1', 'file'];
+    const onComplete = sinon.spy();
+    const readFile = sinon.fake.yields(null, 'cut:this');
     cut(readFile, options, onComplete);
+    assert(onComplete.calledWith({error: '', rowsOfColumns: 'cut:this'}));
   });
 
   it('should give bad delimiter error to onComplete for no delimiter', () => {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, 'cut: bad delimiter');
-      assert.strictEqual(rowsOfColumns, '');
-    };
-    const readFile = (path, encoding, callback) => {
-      assert.strictEqual(path, 'file');
-      assert.strictEqual(encoding, 'utf8');
-      callback(undefined, 'cut:this');
-    };
     const options = ['-d', '-f', '1', 'file'];
+    const onComplete = sinon.spy();
+    const readFile = sinon.fake.yields(null, 'cut:this');
     cut(readFile, options, onComplete);
+    const error = 'cut: bad delimiter';
+    assert(onComplete.calledWith({error, rowsOfColumns: ''}));
   });
 
   it('should give field zero error to onComplete for field is zero', () => {
-    const onComplete = ({ error, rowsOfColumns }) => {
-      assert.strictEqual(error, 'cut: [-cf] list: values may not include zero');
-      assert.strictEqual(rowsOfColumns, '');
-    };
-    const readFile = (path, encoding, callback) => {
-      assert.strictEqual(path, 'file');
-      assert.strictEqual(encoding, 'utf8');
-      callback(undefined, 'cut:this');
-    };
     const options = ['-d', ':', '-f', '0', 'file'];
+    const onComplete = sinon.spy();
+    const readFile = sinon.fake.yields(null, 'cut:this');
     cut(readFile, options, onComplete);
+    const error = 'cut: [-cf] list: values may not include zero';
+    assert(onComplete.calledWith({error, rowsOfColumns: ''}));
   });
 });
