@@ -1,19 +1,38 @@
-const cutRowOfColumn = function(line) {
-  const rowOfColumn = '';
-  const extraField = 1;
-  if (!line.includes(this.delimiter)) {
-    return line;
+class Cut {
+  constructor({ delimiter, field, filename }) {
+    this.delimiter = delimiter;
+    this.field = +field;
+    this.filename = filename;
   }
-  const splitLine = line.split(this.delimiter);
-  return splitLine[+this.field - extraField] || rowOfColumn;
-};
 
-const cutRowsOfColumns = (lines, cutOptions) => {
-  const error = '';
-  const replyWithRow = cutRowOfColumn.bind(cutOptions);
-  const rowsOfColumns = lines.map(replyWithRow).join('\n');
-  return { error, rowsOfColumns };
-};
+  cutColumnOfRow(line) {
+    const rowOfColumn = '';
+    const extraField = 1;
+    if (!line.includes(this.delimiter)) {
+      return line;
+    }
+    const splitLine = line.split(this.delimiter);
+    return splitLine[this.field - extraField] || rowOfColumn;
+  }
+
+  cutRowsOfColumns(content) {
+    const error = '';
+    const lines = content.split('\n');
+    const replyWithRow = this.cutColumnOfRow.bind(this);
+    const rowsOfColumns = lines.map(replyWithRow).join('\n');
+    return { error, rowsOfColumns };
+  }
+
+  loadStreamContent(stream, onComplete) {
+    stream.on('error', () => {
+      const error = `cut: ${this.filename}: No such file or directory`;
+      onComplete({ error, rowsOfColumns: '' });
+    });
+    stream.on('data', content => {
+      onComplete(this.cutRowsOfColumns(''+content));
+    });
+  }
+}
 
 const parseOptions = options => {
   const [, delimiter, , field, filename] = options;
@@ -29,31 +48,16 @@ const parseOptions = options => {
   return { delimiter, field, filename };
 };
 
-const readContent = function(err, content) {
-  const { filename } = this.cutOptions;
-  const rowsOfColumns = '';
-  const error = `cut: ${filename}: No such file or directory`;
-  if (err) {
-    return this.onComplete({ error, rowsOfColumns });
-  }
-  const lines = content.split('\n');
-  this.onComplete(cutRowsOfColumns(lines, this.cutOptions));
-};
-
-const cut = (readFile, options, onComplete) => {
+const cut = (readStreams, options, onComplete) => {
   const cutOptions = parseOptions(options);
   const rowsOfColumns = '';
   if (cutOptions.error) {
-    onComplete({ error: cutOptions.error, rowsOfColumns });
-    return;
+    return onComplete({ error: cutOptions.error, rowsOfColumns });
   }
-  const readFileContent = readContent.bind({ cutOptions, onComplete });
-  readFile(cutOptions.filename, 'utf8', readFileContent);
+  const cutLines = new Cut(cutOptions);
+  const {fileStream, stdin} = readStreams;
+  const inputStream = cutLines.filename ? fileStream(cutLines.filename) : stdin;
+  cutLines.loadStreamContent(inputStream, onComplete);
 };
 
-module.exports = {
-  cutRowsOfColumns,
-  parseOptions,
-  readContent,
-  cut
-};
+module.exports = { parseOptions, cut, Cut };

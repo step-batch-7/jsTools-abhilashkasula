@@ -1,0 +1,6 @@
+node cut.js -d : -f 2 < docs/fileToCut.txt
+hi
+hello
+7
+step 7
+step	7

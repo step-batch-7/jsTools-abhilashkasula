@@ -1,0 +1,2 @@
+echo 'hello:hi' | node cut.js -d : -f 1
+hello

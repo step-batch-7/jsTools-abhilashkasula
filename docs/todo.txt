@@ -24,12 +24,14 @@ v0.1
     --done-- parseOptions
 
 v0.2
-cat fileToCut.txt | node cut.js -d : -f 2
+--done-- cat fileToCut.txt | node cut.js -d : -f 2
+--done-- echo 'hello:hi' | node cut.js -d : -f 2
+--done-- node cut.js -d : -f 2 < fileToCut.txt
   tasks
     --done-- change readFileSync to readFile
-    readStdInContent
-    modify cut - it should decide to take stdin or file
-    give standard input
-    update tests according to the changes made
-    have to give input stream to the reader to load stdin
-    have to pass a function which can perform printing of both error and output.
+    --done-- readStdInContent
+    --done-- modify cut - it should decide to take stdin or file
+    --done-- give standard input
+    --done-- update tests according to the changes made
+    --done-- have to give input stream to the reader to load stdin
+    --done-- have to pass a function which can perform printing of both error and output.

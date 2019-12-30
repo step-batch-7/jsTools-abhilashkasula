@@ -1,4 +1,4 @@
-const { readFile } = require('fs');
+const { createReadStream } = require('fs');
 const { cut } = require('./src/cutLib');
 
 const main = () => {
@@ -7,7 +7,8 @@ const main = () => {
     process.stdout.write(msg.rowsOfColumns);
     process.stderr.write(msg.error);
   };
-  cut(readFile, process.argv.slice(optionsStartFrom), writeToStream);
+  const readStreams = { stdin: process.stdin, fileStream: createReadStream };
+  cut(readStreams, process.argv.slice(optionsStartFrom), writeToStream);
 };
 
 main();

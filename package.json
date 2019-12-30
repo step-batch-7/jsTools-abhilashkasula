@@ -7,10 +7,10 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "mocha && npm run lint",
     "cover": "nyc mocha",
     "coverage": "nyc --reporter=html npm test",
-    "alltests": "npm test && ./runAppTests.sh appTests/*.test",
+    "alltests": "npm test &&./runAppTests.sh appTests/*.test",
     "lint": "eslint src test"
   },
   "repository": {
