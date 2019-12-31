@@ -21,6 +21,17 @@ class Cut {
     const rowsOfColumns = lines.map(replyWithColumn).join('\n');
     return { error, rowsOfColumns };
   }
+
+  loadStreamContent(stream, onComplete) {
+    stream.setEncoding('utf8');
+    stream.on('error', error => {
+      const fileError = `cut: ${error.path}: No such file or directory`;
+      onComplete({ error: fileError, rowsOfColumns: '' });
+    });
+    stream.on('data', content => {
+      onComplete(this.cutRowsOfColumns(content));
+    });
+  }
 }
 
 const parseOptions = options => {
@@ -37,27 +48,16 @@ const parseOptions = options => {
   return { delimiter, field, filename };
 };
 
-const loadStreamContent = function(stream, onComplete) {
-  stream.on('error', (error) => {
-    const fileError = `cut: ${error.path}: No such file or directory`;
-    onComplete({ error: fileError, rowsOfColumns: '' });
-  });
-  stream.on('data', content => {
-    onComplete(this.cutRowsOfColumns(content.toString()));
-  });
-};
-
-const performCut = (readStreams, options, onComplete) => {
+const performCut = (streamCreators, options, onComplete) => {
   const { delimiter, field, filename, error} = parseOptions(options);
   const rowsOfColumns = '';
   if (error) {
     return onComplete({ error, rowsOfColumns });
   }
   const cut = new Cut(delimiter, field);
-  const {fileStream, stdin} = readStreams;
-  const loadContent = loadStreamContent.bind(cut);
-  const inputStream = filename ? fileStream(filename) : stdin;
-  loadContent(inputStream, onComplete);
+  const { createStdinStream, createFileStream } = streamCreators;
+  const stream = filename ? createFileStream(filename) : createStdinStream();
+  cut.loadStreamContent(stream, onComplete);
 };
 
-module.exports = { parseOptions, performCut, Cut, loadStreamContent };
+module.exports = { parseOptions, performCut, Cut };

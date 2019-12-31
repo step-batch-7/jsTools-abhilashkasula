@@ -1,11 +1,6 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
-const { EventEmitter } = require('events');
-const { Cut,
-  parseOptions,
-  performCut,
-  loadStreamContent
-} = require('../src/cutLib.js');
+const { Cut, parseOptions, performCut } = require('../src/cutLib.js');
 
 describe('Cut', function() {
   describe('cutRowsOfColumns', function() {
@@ -54,36 +49,40 @@ describe('Cut', function() {
 
   describe('loadStreamContent', () => {
     it('should give cut content to onComplete after loading from file', () => {
-      const cut = new Cut(':', '1');
-      const fileStream = new EventEmitter();
+      const cut = new Cut(':', '1'), arg1 = 1, arg0 = 0;
+      const fileStream = { setEncoding: sinon.fake(), on: sinon.fake() };
       const onComplete = sinon.spy();
-      loadStreamContent.call(cut, fileStream, onComplete);
-      fileStream.emit('data', 'cut:this\nthis:cut');
-      const rowsOfColumns = 'cut\nthis';
-      const parametersToOnComplete = { error: '', rowsOfColumns };
-      assert.isTrue(onComplete.calledWith(parametersToOnComplete));
+      const expectedParameters = { error: '', rowsOfColumns: 'cut\nthis' };
+      cut.loadStreamContent(fileStream, onComplete);
+      fileStream.on.secondCall.args[arg1]('cut:this\nthis:cut');
+      assert.strictEqual(fileStream.on.secondCall.args[arg0], 'data');
+      assert.isTrue(fileStream.setEncoding.calledWithExactly('utf8'));
+      assert.isTrue(onComplete.calledWith(expectedParameters));
     });
 
     it('should give empty content to onComplete for no content loaded', () => {
-      const cut = new Cut(':', '1');
-      const fileStream = new EventEmitter();
+      const cut = new Cut(':', '1'), arg1 = 1, arg0 = 0;
+      const fileStream = { setEncoding: sinon.fake(), on: sinon.fake() };
       const onComplete = sinon.spy();
-      loadStreamContent.call(cut, fileStream, onComplete);
-      fileStream.emit('data', '');
-      const rowsOfColumns = '';
-      const parametersToOnComplete = { error: '', rowsOfColumns };
-      assert.isTrue(onComplete.calledWith(parametersToOnComplete));
+      const expectedParameters = { error: '', rowsOfColumns: '' };
+      cut.loadStreamContent(fileStream, onComplete);
+      fileStream.on.secondCall.args[arg1]('');
+      assert.strictEqual(fileStream.on.secondCall.args[arg0], 'data');
+      assert.isTrue(fileStream.setEncoding.calledWithExactly('utf8'));
+      assert.isTrue(onComplete.calledWith(expectedParameters));
     });
 
     it('should give error to onComplete for error is given', () => {
-      const cut = new Cut(':', '1');
-      const fileStream = new EventEmitter();
-      const onComplete = sinon.spy();
-      loadStreamContent.call(cut, fileStream, onComplete);
-      fileStream.emit('error', {path: 'one.txt'});
+      const cut = new Cut(':', '1'), arg1 = 1, arg0 = 0;
+      const fileStream = { setEncoding: sinon.fake(), on: sinon.fake() };
       const error = 'cut: one.txt: No such file or directory';
-      const parametersToOnComplete = { error, rowsOfColumns: '' };
-      assert.isTrue(onComplete.calledWith(parametersToOnComplete));
+      const expectedParameters = { error, rowsOfColumns: '' };
+      const onComplete = sinon.spy();
+      cut.loadStreamContent(fileStream, onComplete);
+      fileStream.on.firstCall.args[arg1]({ path: 'one.txt' });
+      assert.strictEqual(fileStream.on.firstCall.args[arg0], 'error');
+      assert.isTrue(fileStream.setEncoding.calledWithExactly('utf8'));
+      assert.isTrue(onComplete.calledWith(expectedParameters));
     });
   });
 });
@@ -114,86 +113,94 @@ describe('parseOptions', function() {
   });
 });
 
+/*eslint max-statements:[0] */
 describe('performCut', function() {
   it('should give error to onComplete for triggering error event', function() {
-    const options = ['-d', ':', '-f', '2', 'badFile.txt'];
+    const options = ['-d', ':', '-f', '2', 'badFile.txt'], arg1 = 1, arg0 = 0;
     const onComplete = sinon.spy();
-    const fileReadStream = new EventEmitter();
-    const fileStream = sinon.fake.returns(fileReadStream);
-    const stdin = new EventEmitter();
-    performCut({ fileStream, stdin }, options, onComplete);
-    fileReadStream.emit('error', {path: 'badFile.txt'});
+    const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
+    const createFileStream = sinon.fake.returns(fileReadStream);
     const error = 'cut: badFile.txt: No such file or directory';
+    performCut({ createFileStream }, options, onComplete);
+    fileReadStream.on.firstCall.args[arg1]({ path: 'badFile.txt' });
+    assert.strictEqual(fileReadStream.on.firstCall.args[arg0], 'error');
+    assert.isTrue(createFileStream.calledWith('badFile.txt'));
+    assert.isTrue(fileReadStream.setEncoding.calledWithExactly('utf8'));
     assert(onComplete.calledWith({error, rowsOfColumns: ''}));
   });
 
   it('should give result to onComplete for data event are found', () => {
-    const options = ['-d', ':', '-f', '2', 'file'];
+    const options = ['-d', ':', '-f', '2', 'one.txt'], arg1 = 1, arg0 = 0;
     const onComplete = sinon.spy();
-    const fileReadStream = new EventEmitter();
-    const fileStream = sinon.fake.returns(fileReadStream);
-    const stdin = new EventEmitter();
-    performCut({ fileStream, stdin }, options, onComplete);
-    fileReadStream.emit('data', 'cut:this\nthis:cut');
+    const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
+    const createFileStream = sinon.fake.returns(fileReadStream);
+    performCut({ createFileStream }, options, onComplete);
+    fileReadStream.on.secondCall.args[arg1]('cut:this\nthis:cut');
+    assert.strictEqual(fileReadStream.on.secondCall.args[arg0], 'data');
+    assert.isTrue(createFileStream.calledWith('one.txt'));
+    assert.isTrue(fileReadStream.setEncoding.calledWithExactly('utf8'));
     assert(onComplete.calledWith({error: '', rowsOfColumns: 'this\ncut'}));
   });
 
   it('should give empty lines to onComplete for field is not found', () => {
-    const options = ['-d', ':', '-f', '100', 'file'];
+    const options = ['-d', ':', '-f', '100', 'file.txt'], arg1 = 1, arg0 = 0;
     const onComplete = sinon.spy();
-    const fileReadStream = new EventEmitter();
-    const fileStream = sinon.fake.returns(fileReadStream);
-    const stdin = new EventEmitter();
-    performCut({ fileStream, stdin }, options, onComplete);
-    fileReadStream.emit('data', 'cut:this\nthis:cut');
+    const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
+    const createFileStream = sinon.fake.returns(fileReadStream);
+    performCut({ createFileStream }, options, onComplete);
+    fileReadStream.on.secondCall.args[arg1]('cut:this\nthis:cut');
+    assert.strictEqual(fileReadStream.on.secondCall.args[arg0], 'data');
+    assert.isTrue(createFileStream.calledWith('file.txt'));
+    assert.isTrue(fileReadStream.setEncoding.calledWithExactly('utf8'));
     assert(onComplete.calledWith({ error: '', rowsOfColumns: '\n' }));
   });
 
   it('should give whole lines to onComplete for delimiter is not found', () => {
-    const options = ['-d', ',', '-f', '1', 'file'];
+    const options = ['-d', ',', '-f', '1', 'file.txt'], arg1 = 1, arg0 = 0;
     const onComplete = sinon.spy();
-    const fileReadStream = new EventEmitter();
-    const fileStream = sinon.fake.returns(fileReadStream);
-    const stdin = new EventEmitter();
-    performCut({ fileStream, stdin }, options, onComplete);
-    fileReadStream.emit('data', 'cut:this\nthis:cut');
+    const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
+    const createFileStream = sinon.fake.returns(fileReadStream);
     const rowsOfColumns = 'cut:this\nthis:cut';
+    performCut({ createFileStream }, options, onComplete);
+    fileReadStream.on.secondCall.args[arg1]('cut:this\nthis:cut');
+    assert.strictEqual(fileReadStream.on.secondCall.args[arg0], 'data');
+    assert.isTrue(createFileStream.calledWith('file.txt'));
+    assert.isTrue(fileReadStream.setEncoding.calledWithExactly('utf8'));
     assert(onComplete.calledWith({ error: '', rowsOfColumns }));
   });
 
   it('should give bad delimiter error to onComplete for no delimiter', () => {
-    const options = ['-d', '-f', '1', 'file'];
+    const options = ['-d', '-f', '1', 'file.txt'];
     const onComplete = sinon.spy();
-    const fileReadStream = new EventEmitter();
-    const fileStream = sinon.fake.returns(fileReadStream);
-    const stdin = new EventEmitter();
-    performCut({ fileStream, stdin }, options, onComplete);
-    fileReadStream.emit('data', 'cut:this\nthis:cut');
+    const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
+    const createFileStream = sinon.fake.returns(fileReadStream);
     const error = 'cut: bad delimiter';
+    performCut({ createFileStream }, options, onComplete);
+    assert.isFalse(createFileStream.called);
     assert(onComplete.calledWith({ error, rowsOfColumns: '' }));
   });
 
   it('should give field zero error to onComplete for field is zero', () => {
     const options = ['-d', ':', '-f', '0', 'file'];
     const onComplete = sinon.spy();
-    const fileReadStream = new EventEmitter();
-    const fileStream = sinon.fake.returns(fileReadStream);
-    const stdin = new EventEmitter();
-    performCut({ fileStream, stdin }, options, onComplete);
-    fileReadStream.emit('data', 'cut:this\nthis:cut');
+    const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
+    const createFileStream = sinon.fake.returns(fileReadStream);
     const error = 'cut: [-cf] list: values may not include zero';
+    performCut({ createFileStream }, options, onComplete);
+    assert.isFalse(createFileStream.called);
     assert(onComplete.calledWith({ error, rowsOfColumns: '' }));
   });
 
   it('should give result to onComplete for stdin', () => {
-    const options = ['-d', ':', '-f', '1'];
+    const options = ['-d', ':', '-f', '1'], arg1 = 1, arg0 = 0;
     const onComplete = sinon.spy();
-    const fileReadStream = new EventEmitter();
-    const fileStream = sinon.fake.returns(fileReadStream);
-    const stdin = new EventEmitter();
-    performCut({ fileStream, stdin }, options, onComplete);
-    stdin.emit('data', 'cut:this\nthis:cut');
+    const stdin = { setEncoding: sinon.fake(), on: sinon.fake() };
+    const createStdinStream = sinon.fake.returns(stdin);
     const rowsOfColumns = 'cut\nthis';
+    performCut({ createStdinStream }, options, onComplete);
+    stdin.on.secondCall.args[arg1]('cut:this\nthis:cut');
+    assert.strictEqual(stdin.on.secondCall.args[arg0], 'data');
+    assert.isTrue(stdin.setEncoding.calledWithExactly('utf8'));
     assert(onComplete.calledWith({ error: '', rowsOfColumns }));
   });
 });
