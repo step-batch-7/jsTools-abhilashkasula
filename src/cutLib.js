@@ -1,8 +1,7 @@
 class Cut {
-  constructor({ delimiter, field, filename }) {
+  constructor(delimiter, field) {
     this.delimiter = delimiter;
     this.field = +field;
-    this.filename = filename;
   }
 
   cutColumnOfRow(line) {
@@ -18,19 +17,9 @@ class Cut {
   cutRowsOfColumns(content) {
     const error = '';
     const lines = content.split('\n');
-    const replyWithRow = this.cutColumnOfRow.bind(this);
-    const rowsOfColumns = lines.map(replyWithRow).join('\n');
+    const replyWithColumn = this.cutColumnOfRow.bind(this);
+    const rowsOfColumns = lines.map(replyWithColumn).join('\n');
     return { error, rowsOfColumns };
-  }
-
-  loadStreamContent(stream, onComplete) {
-    stream.on('error', () => {
-      const error = `cut: ${this.filename}: No such file or directory`;
-      onComplete({ error, rowsOfColumns: '' });
-    });
-    stream.on('data', content => {
-      onComplete(this.cutRowsOfColumns(''+content));
-    });
   }
 }
 
@@ -48,16 +37,27 @@ const parseOptions = options => {
   return { delimiter, field, filename };
 };
 
-const cut = (readStreams, options, onComplete) => {
-  const cutOptions = parseOptions(options);
-  const rowsOfColumns = '';
-  if (cutOptions.error) {
-    return onComplete({ error: cutOptions.error, rowsOfColumns });
-  }
-  const cutLines = new Cut(cutOptions);
-  const {fileStream, stdin} = readStreams;
-  const inputStream = cutLines.filename ? fileStream(cutLines.filename) : stdin;
-  cutLines.loadStreamContent(inputStream, onComplete);
+const loadStreamContent = function(stream, onComplete) {
+  stream.on('error', (error) => {
+    const fileError = `cut: ${error.path}: No such file or directory`;
+    onComplete({ error: fileError, rowsOfColumns: '' });
+  });
+  stream.on('data', content => {
+    onComplete(this.cutRowsOfColumns(content.toString()));
+  });
 };
 
-module.exports = { parseOptions, cut, Cut };
+const performCut = (readStreams, options, onComplete) => {
+  const { delimiter, field, filename, error} = parseOptions(options);
+  const rowsOfColumns = '';
+  if (error) {
+    return onComplete({ error, rowsOfColumns });
+  }
+  const cut = new Cut(delimiter, field);
+  const {fileStream, stdin} = readStreams;
+  const loadContent = loadStreamContent.bind(cut);
+  const inputStream = filename ? fileStream(filename) : stdin;
+  loadContent(inputStream, onComplete);
+};
+
+module.exports = { parseOptions, performCut, Cut, loadStreamContent };
