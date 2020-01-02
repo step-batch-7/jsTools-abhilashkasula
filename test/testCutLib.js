@@ -1,6 +1,11 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
-const { Cut, parseOptions, performCut } = require('../src/cutLib.js');
+const {
+  Cut,
+  parseOptions,
+  performCut,
+  createStream
+} = require('../src/cutLib.js');
 
 describe('Cut', function() {
   describe('cutRowsOfColumns', function() {
@@ -113,6 +118,23 @@ describe('parseOptions', function() {
   });
 });
 
+describe('createStream', function() {
+  it('should give file stream for filename given', function() {
+    const stream = { setEncoding: sinon.fake(), on: sinon.fake() };
+    const createFileStream = sinon.fake.returns(stream);
+    const actual = createStream('file.txt', { createFileStream });
+    assert.deepStrictEqual(actual, stream);
+    assert.isTrue(createFileStream.calledWith('file.txt'));
+  });
+
+  it('should give stdin stream for filename not given', function() {
+    const stream = { setEncoding: sinon.fake(), on: sinon.fake() };
+    const createStdinStream = sinon.fake.returns(stream);
+    const actual = createStream(undefined, { createStdinStream });
+    assert.deepStrictEqual(actual, stream);
+  });
+});
+
 /*eslint max-statements:[0] */
 describe('performCut', function() {
   it('should give error to onComplete for triggering error event', function() {
@@ -121,7 +143,7 @@ describe('performCut', function() {
     const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
     const createFileStream = sinon.fake.returns(fileReadStream);
     const error = 'cut: badFile.txt: No such file or directory';
-    performCut({ createFileStream }, options, onComplete);
+    performCut(options, { createFileStream }, onComplete);
     fileReadStream.on.firstCall.args[arg1]({ path: 'badFile.txt' });
     assert.strictEqual(fileReadStream.on.firstCall.args[arg0], 'error');
     assert.isTrue(createFileStream.calledWith('badFile.txt'));
@@ -134,7 +156,7 @@ describe('performCut', function() {
     const onComplete = sinon.spy();
     const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
     const createFileStream = sinon.fake.returns(fileReadStream);
-    performCut({ createFileStream }, options, onComplete);
+    performCut(options, { createFileStream }, onComplete);
     fileReadStream.on.secondCall.args[arg1]('cut:this\nthis:cut');
     assert.strictEqual(fileReadStream.on.secondCall.args[arg0], 'data');
     assert.isTrue(createFileStream.calledWith('one.txt'));
@@ -147,7 +169,7 @@ describe('performCut', function() {
     const onComplete = sinon.spy();
     const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
     const createFileStream = sinon.fake.returns(fileReadStream);
-    performCut({ createFileStream }, options, onComplete);
+    performCut(options, { createFileStream }, onComplete);
     fileReadStream.on.secondCall.args[arg1]('cut:this\nthis:cut');
     assert.strictEqual(fileReadStream.on.secondCall.args[arg0], 'data');
     assert.isTrue(createFileStream.calledWith('file.txt'));
@@ -161,7 +183,7 @@ describe('performCut', function() {
     const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
     const createFileStream = sinon.fake.returns(fileReadStream);
     const rowsOfColumns = 'cut:this\nthis:cut';
-    performCut({ createFileStream }, options, onComplete);
+    performCut(options, { createFileStream }, onComplete);
     fileReadStream.on.secondCall.args[arg1]('cut:this\nthis:cut');
     assert.strictEqual(fileReadStream.on.secondCall.args[arg0], 'data');
     assert.isTrue(createFileStream.calledWith('file.txt'));
@@ -175,7 +197,7 @@ describe('performCut', function() {
     const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
     const createFileStream = sinon.fake.returns(fileReadStream);
     const error = 'cut: bad delimiter';
-    performCut({ createFileStream }, options, onComplete);
+    performCut(options, { createFileStream }, onComplete);
     assert.isFalse(createFileStream.called);
     assert(onComplete.calledWith({ error, rowsOfColumns: '' }));
   });
@@ -186,7 +208,7 @@ describe('performCut', function() {
     const fileReadStream = { setEncoding: sinon.fake(), on: sinon.fake() };
     const createFileStream = sinon.fake.returns(fileReadStream);
     const error = 'cut: [-cf] list: values may not include zero';
-    performCut({ createFileStream }, options, onComplete);
+    performCut(options, { createFileStream }, onComplete);
     assert.isFalse(createFileStream.called);
     assert(onComplete.calledWith({ error, rowsOfColumns: '' }));
   });
@@ -197,7 +219,7 @@ describe('performCut', function() {
     const stdin = { setEncoding: sinon.fake(), on: sinon.fake() };
     const createStdinStream = sinon.fake.returns(stdin);
     const rowsOfColumns = 'cut\nthis';
-    performCut({ createStdinStream }, options, onComplete);
+    performCut(options, { createStdinStream }, onComplete);
     stdin.on.secondCall.args[arg1]('cut:this\nthis:cut');
     assert.strictEqual(stdin.on.secondCall.args[arg0], 'data');
     assert.isTrue(stdin.setEncoding.calledWithExactly('utf8'));

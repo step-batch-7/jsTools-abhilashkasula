@@ -34,8 +34,13 @@ class Cut {
   }
 }
 
+const createStream = (filename, streamCreators) => {
+  const { createFileStream, createStdinStream } = streamCreators;
+  return filename ? createFileStream(filename) : createStdinStream();
+};
+
 const parseOptions = options => {
-  const [, delimiter, , field, filename] = options;
+  const [, delimiter,, field, filename] = options;
   if (delimiter === '-f') {
     return { error: 'cut: bad delimiter' };
   }
@@ -48,16 +53,15 @@ const parseOptions = options => {
   return { delimiter, field, filename };
 };
 
-const performCut = (streamCreators, options, onComplete) => {
-  const { delimiter, field, filename, error} = parseOptions(options);
+const performCut = (options, streamCreators, onComplete) => {
+  const { delimiter, field, filename, error } = parseOptions(options);
   const rowsOfColumns = '';
   if (error) {
     return onComplete({ error, rowsOfColumns });
   }
   const cut = new Cut(delimiter, field);
-  const { createStdinStream, createFileStream } = streamCreators;
-  const stream = filename ? createFileStream(filename) : createStdinStream();
+  const stream = createStream(filename, streamCreators);
   cut.loadStreamContent(stream, onComplete);
 };
 
-module.exports = { parseOptions, performCut, Cut };
+module.exports = { parseOptions, performCut, Cut, createStream };

@@ -5,11 +5,10 @@ const main = () => {
   const [,, ...options] = process.argv;
   const createStdinStream = () => process.stdin;
   const createFileStream = createReadStream;
-  const printResult = msg => {
-    process.stdout.write(msg.rowsOfColumns);
-    process.stderr.write(msg.error);
-  };
-  performCut({ createStdinStream, createFileStream }, options, printResult);
+  performCut(options, { createFileStream, createStdinStream}, result => {
+    process.stdout.write(result.rowsOfColumns);
+    process.stderr.write(result.error);
+  });
 };
 
 main();
