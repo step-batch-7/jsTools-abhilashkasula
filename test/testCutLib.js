@@ -101,23 +101,6 @@ describe('parseOptions', function() {
   });
 });
 
-// describe('createStream', function() {
-//   it('should give file stream for filename given', function() {
-//     const stream = {setEncoding: sinon.fake(), on: sinon.fake()};
-//     const createFileStream = sinon.fake.returns(stream);
-//     const actual = createStream('file.txt', {createFileStream});
-//     assert.deepStrictEqual(actual, stream);
-//     assert.isTrue(createFileStream.calledWith('file.txt'));
-//   });
-
-//   it('should give stdin stream for filename not given', function() {
-//     const stream = {setEncoding: sinon.fake(), on: sinon.fake()};
-//     const createStdinStream = sinon.fake.returns(stream);
-//     const actual = createStream(undefined, {createStdinStream});
-//     assert.deepStrictEqual(actual, stream);
-//   });
-// });
-
 describe('performCut', function() {
   let stream, onComplete;
   beforeEach(() => {
