@@ -1,5 +1,5 @@
 const {createReadStream} = require('fs');
-const {performCut} = require('./src/cutLib');
+const {performCut} = require('./src/performCut');
 const StreamPicker = require('./src/streamPicker');
 
 const main = () => {
