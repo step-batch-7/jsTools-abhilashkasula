@@ -35,3 +35,6 @@ v0.2
     --done-- update tests according to the changes made
     --done-- have to give input stream to the reader to load stdin
     --done-- have to pass a function which can perform printing of both error and output.
+
+    Make cut class only for cutting.
+    Make reading out of cut.
