@@ -19,14 +19,14 @@ class Cut {
     const lines = content.split('\n');
     const replyWithColumn = this.cutColumnOfRow.bind(this);
     const rowsOfColumns = lines.map(replyWithColumn).join('\n');
-    return { error, rowsOfColumns };
+    return {error, rowsOfColumns};
   }
 
   loadStreamContent(stream, onComplete) {
     stream.setEncoding('utf8');
     stream.on('error', error => {
       const fileError = `cut: ${error.path}: No such file or directory`;
-      onComplete({ error: fileError, rowsOfColumns: '' });
+      onComplete({error: fileError, rowsOfColumns: ''});
     });
     stream.on('data', content => {
       onComplete(this.cutRowsOfColumns(content));
@@ -35,33 +35,33 @@ class Cut {
 }
 
 const createStream = (filename, streamCreators) => {
-  const { createFileStream, createStdinStream } = streamCreators;
+  const {createFileStream, createStdinStream} = streamCreators;
   return filename ? createFileStream(filename) : createStdinStream();
 };
 
 const parseOptions = options => {
   const [, delimiter,, field, filename] = options;
   if (delimiter === '-f') {
-    return { error: 'cut: bad delimiter' };
+    return {error: 'cut: bad delimiter'};
   }
   if (field === '0') {
-    return { error: 'cut: [-cf] list: values may not include zero' };
+    return {error: 'cut: [-cf] list: values may not include zero'};
   }
   if (isNaN(+field)) {
-    return { error: 'cut: [-cf] list: illegal list value' };
+    return {error: 'cut: [-cf] list: illegal list value'};
   }
-  return { delimiter, field, filename };
+  return {delimiter, field, filename};
 };
 
 const performCut = (options, streamCreators, onComplete) => {
-  const { delimiter, field, filename, error } = parseOptions(options);
+  const {delimiter, field, filename, error} = parseOptions(options);
   const rowsOfColumns = '';
   if (error) {
-    return onComplete({ error, rowsOfColumns });
+    return onComplete({error, rowsOfColumns});
   }
   const cut = new Cut(delimiter, field);
   const stream = createStream(filename, streamCreators);
   cut.loadStreamContent(stream, onComplete);
 };
 
-module.exports = { parseOptions, performCut, Cut, createStream };
+module.exports = {parseOptions, performCut, Cut, createStream};
