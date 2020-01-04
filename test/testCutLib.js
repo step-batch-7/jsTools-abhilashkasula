@@ -35,23 +35,6 @@ describe('Cut', function() {
     });
   });
 
-  describe('cutColumnOfRow', function() {
-    it('should give the field given from the line', () => {
-      const cut = new Cut(':', '2');
-      assert.strictEqual(cut.cutColumnOfRow('cut:this'), 'this');
-    });
-    
-    it('should give empty field for the given column number not found', () => {
-      const cut = new Cut(':', '10');
-      assert.strictEqual(cut.cutColumnOfRow('cut:this'), '');
-    });
-
-    it('should give whole line field for the given delimiter not found', () => {
-      const cut = new Cut(',', '1');
-      assert.strictEqual(cut.cutColumnOfRow('cut:this'), 'cut:this');
-    });
-  });
-
   describe('loadStreamContent', () => {
     let stream, onComplete;
     beforeEach(() => {

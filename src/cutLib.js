@@ -1,23 +1,23 @@
+const cutField = (field, delimiter, line) => {
+  const rowOfColumn = '';
+  const extraField = 1;
+  if (!line.includes(delimiter)) {
+    return line;
+  }
+  const splitLine = line.split(delimiter);
+  return splitLine[field - extraField] || rowOfColumn;
+};
+
 class Cut {
   constructor(delimiter, field) {
     this.delimiter = delimiter;
     this.field = +field;
   }
 
-  cutColumnOfRow(line) {
-    const rowOfColumn = '';
-    const extraField = 1;
-    if (!line.includes(this.delimiter)) {
-      return line;
-    }
-    const splitLine = line.split(this.delimiter);
-    return splitLine[this.field - extraField] || rowOfColumn;
-  }
-
   cutRowsOfColumns(content) {
     const error = '';
     const lines = content.split('\n');
-    const replyWithColumn = this.cutColumnOfRow.bind(this);
+    const replyWithColumn = cutField.bind(null, this.field, this.delimiter);
     const rowsOfColumns = lines.map(replyWithColumn).join('\n');
     return {error, rowsOfColumns};
   }
