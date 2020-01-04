@@ -34,11 +34,6 @@ class Cut {
   }
 }
 
-const createStream = (filename, streamCreators) => {
-  const {createFileStream, createStdinStream} = streamCreators;
-  return filename ? createFileStream(filename) : createStdinStream();
-};
-
 const parseOptions = options => {
   const [, delimiter,, field, filename] = options;
   if (delimiter === '-f') {
@@ -53,15 +48,15 @@ const parseOptions = options => {
   return {delimiter, field, filename};
 };
 
-const performCut = (options, streamCreators, onComplete) => {
+const performCut = (options, streamPicker, onComplete) => {
   const {delimiter, field, filename, error} = parseOptions(options);
   const rowsOfColumns = '';
   if (error) {
     return onComplete({error, rowsOfColumns});
   }
   const cut = new Cut(delimiter, field);
-  const stream = createStream(filename, streamCreators);
+  const stream = streamPicker.pick(filename);
   cut.loadStreamContent(stream, onComplete);
 };
 
-module.exports = {parseOptions, performCut, Cut, createStream};
+module.exports = {parseOptions, performCut, Cut};

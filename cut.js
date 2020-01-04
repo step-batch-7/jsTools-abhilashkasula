@@ -1,11 +1,11 @@
 const {createReadStream} = require('fs');
 const {performCut} = require('./src/cutLib');
+const StreamPicker = require('./src/streamPicker');
 
 const main = () => {
   const [,, ...options] = process.argv;
-  const createStdinStream = () => process.stdin;
-  const createFileStream = createReadStream;
-  performCut(options, {createFileStream, createStdinStream}, result => {
+  const streamPicker = new StreamPicker(createReadStream, process.stdin);
+  performCut(options, streamPicker, result => {
     process.stdout.write(result.rowsOfColumns);
     process.stderr.write(result.error);
   });
